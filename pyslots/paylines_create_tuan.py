@@ -1,5 +1,5 @@
 import random
-
+# for test
 DEBUG_ON = True
 PACKAGE_NAME = 'paylines_create_tuan'
 

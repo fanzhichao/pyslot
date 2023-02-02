@@ -3,7 +3,7 @@ import paylines_compute_win as compute_win
 import paylines_create_tuan as create_tuan
 DEBUG_ON = True
 PACKAGE_NAME = 'game5001'
-
+# just for test
 
 def pprint(str):
     if DEBUG_ON:

@@ -8,14 +8,16 @@ PACKAGE_NAME = 'paylines_compute_win'
 def get_pl_from_excel(excel_file_name):
     pl_list = []
     gl_list = []
+    pl_need_num_list = [] # 该赔率需要的组合数
     data = pandas.read_excel(excel_file_name, names=None)
-    pl_list = data.values[:, -2].tolist()
-    gl_list = data.values[:, -1].tolist()
+    pl_list = data.values[:, 0].tolist()
+    gl_list = data.values[:, 1].tolist()
+    pl_need_num_list = data.values[:, 4].tolist()
     sum_gl = sum(gl_list)
     if sum_gl > 1 or sum_gl < 0.5:
         if DEBUG_ON:
             print(PACKAGE_NAME +": the sum of gl is wrong, result: " + str(sum_gl))
-    return pl_list, gl_list
+    return pl_list, gl_list, pl_need_num_list
 
 TUAN_PL_MAP = {
     '9' :[0, 0, 0, 2, 5],

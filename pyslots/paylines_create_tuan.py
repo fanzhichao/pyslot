@@ -1,6 +1,6 @@
 import random
 # for test
-DEBUG_ON = True
+DEBUG_ON = False
 PACKAGE_NAME = 'paylines_create_tuan'
 
 def pprint(str):

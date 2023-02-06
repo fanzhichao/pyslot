@@ -131,7 +131,7 @@ UNIT_TEST_QUANZHONG_LIST_REELS = ((10, 5, 25, 10, 20, 12, 0, 5),
 def UNIT_TEST_create_all_tuan(src_tuan_list, src_quanzhong_list, row, col):
     tuan_list = create_all_tuan(src_tuan_list, src_quanzhong_list, row, col)
     tuan_count = 0
-    print("****package:" + PACKAGE_NAME + "  ****funtion:UNIT_TEST_create_all_tuan, new tuan matrix:" + str(tuan_list))
+    pprint("****package:" + PACKAGE_NAME + "  ****funtion:UNIT_TEST_create_all_tuan, new tuan matrix:" + str(tuan_list))
     # 首先测试一下，看有没有非法图案，即所有图案都是图案数组中的
     for tuan in UNIT_TEST_TUAN_LIST:
         for row_tuan in tuan_list:
@@ -174,16 +174,35 @@ UNIT_TEST_RESULT_TUAN_AFTER_UP_X_2 = [['X', '10', 'X', 'J', '10'], ['9', 'X', 'Q
 def UNIT_TEST_update_all_tuan_with_X(old_tuan, win_result, pay_lines, result):
     new_tuan = update_all_tuan_with_X(old_tuan, win_result, pay_lines)
     for i, row in enumerate(new_tuan):
-        for j in range(len(new_tuan)):
+        for j in range(len(row)):
             assert new_tuan[i][j] == result[i][j]
-    print(new_tuan)
-    print(result)
+
+
+########################           测试用例3    ########################
+UNIT_TEST_OLD_TUAN1 = [['X', '10', '9', 'J', '10'], ['9', 'X', 'Q', '9', 'K'], ['J', 'A', 'X', 'Q', 'S']]
+UNIT_TEST_NEW_TUAN1 = [['M', 'M', 'M', 'J', '10'], ['9', '10', '9', '9', 'K'], ['J', 'A', 'Q', 'Q', 'S']]
+
+UNIT_TEST_OLD_TUAN2 = [['9', 'K', 'X', 'J', 'X'], ['Q', 'W', 'S', 'A', 'W'], ['X', 'K', 'X', '9', 'X'], ['K', 'X', '10', 'X', '10']]
+UNIT_TEST_NEW_TUAN2 = [['M', 'M', 'M', 'M', 'M'], ['9', 'K', 'M', 'J', 'M'], ['Q', 'W', 'S', 'A', 'W'], ['K', 'K', '10', '9', '10']]
+def UNIT_TEST_update_X_with_new_tuan(old_all_tuan_with_X, tuan_list, quanzhong_list, result):
+    new_tuan = update_X_with_new_tuan(old_all_tuan_with_X, tuan_list, quanzhong_list)
+    for i, row in enumerate(result):
+        for j in range(len(row)):
+            if result[i][j] != 'M':
+                assert new_tuan[i][j] == result[i][j]
+
+
+
 
 if __name__ == '__main__':
     # 跑1000次，确保测试结果ok
+    print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例1")
     for i in range(1000):
         UNIT_TEST_create_all_tuan(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 3, 5)
         UNIT_TEST_create_all_tuan(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 4, 5)
-
+    print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例2")
     UNIT_TEST_update_all_tuan_with_X(UNIT_TEST_OLD_ALL_TUAN, UNIT_TEST_WIN_RESUT1, UNIT_TEST_PAYLINES, UNIT_TEST_RESULT_TUAN_AFTER_UP_X_1)
     UNIT_TEST_update_all_tuan_with_X(UNIT_TEST_OLD_ALL_TUAN, UNIT_TEST_WIN_RESUT2, UNIT_TEST_PAYLINES, UNIT_TEST_RESULT_TUAN_AFTER_UP_X_2)
+    print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例3")
+    UNIT_TEST_update_X_with_new_tuan(UNIT_TEST_OLD_TUAN1, UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, UNIT_TEST_NEW_TUAN1)
+    UNIT_TEST_update_X_with_new_tuan(UNIT_TEST_OLD_TUAN2, UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, UNIT_TEST_NEW_TUAN2)

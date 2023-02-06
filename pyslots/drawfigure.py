@@ -1,4 +1,12 @@
-
+'''
+@Author  :   Frank
+@License :   (C) Copyright 2019-2025, StarryFun
+@Contact :   fanzhichao1983@gmail.com
+@Software:   slot
+@File    :   drawfigure.py
+@Time    :   2022/6/8
+@Desc    :   专门用来绘制RTP走势图，具体要根据大量的bet数据去生成
+'''
 import matplotlib.pyplot as plt
 
 BET_LIST = [100, 150, 500, 100, 500, 50, 300,500, 100,300]

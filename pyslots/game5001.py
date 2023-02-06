@@ -1,4 +1,12 @@
-
+'''
+@Author  :   Frank
+@License :   (C) Copyright 2019-2025, StarryFun
+@Contact :   fanzhichao1983@gmail.com
+@Software:   slot
+@File    :   game5001.py
+@Time    :   2022/6/8
+@Desc    :
+'''
 import time
 from tqdm import tqdm
 import paylines_compute_win as compute_win

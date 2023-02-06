@@ -1,4 +1,12 @@
-
+'''
+@Author  :   Frank
+@License :   (C) Copyright 2019-2025, StarryFun
+@Contact :   fanzhichao1983@gmail.com
+@Software:   slot
+@File    :   paylines_compute_win.py
+@Time    :   2022/6/8
+@Desc    :   专门用来计算paylines游戏中，每局图案的中奖情况。
+'''
 import pandas
 
 DEBUG_ON = False

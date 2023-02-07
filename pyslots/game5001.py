@@ -11,6 +11,7 @@ import time
 from tqdm import tqdm
 import paylines_compute_win as compute_win
 import paylines_create_tuan as create_tuan
+import tools
 DEBUG_ON = True
 PACKAGE_NAME = 'game5001'
 PV_MIN = 0.8
@@ -66,8 +67,7 @@ def pl_is_match(pl, pl_to_match_list, index):
 
 
 if __name__ == '__main__':
-    pl_list, gl_list, pl_need_num_list = compute_win.get_pl_from_excel(GAME5001_EXCEL)
-
+    pl_list, gl_list, pl_need_num_list = tools.get_pl_from_excel(GAME5001_EXCEL)
     num = sum(pl_need_num_list) # 需要生成的组合总数
     pl_get_num_list = [0] * len(pl_need_num_list)  # 保存一下每个赔率得到了多少个组合
     pprint("总共需要 "+str(num) + "组组合")

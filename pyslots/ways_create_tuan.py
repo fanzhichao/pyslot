@@ -137,6 +137,23 @@ def updata_tuan_with_block_list(tuan, block_list):
     return tuan
 
 
+# 根据当前的图案矩阵、中奖结果，把中奖的图案替换为'X'，以便后续处理
+# 这个是生成combo2/combo3.../comboN的第1步（连续消除后的新图案矩阵）
+
+# tuan_matrix = [['J', 'Q', '9', 'A', 'W', 'S'],
+#                ['9', 'K', 'W', 'J', 'Q', '9'],
+#                ['Q', 'M', 'S', 'A', 'W', 'Q'],
+#                ['K', 'K', '10', '9', '10', 'J'],
+#                ['Q', 'K', 'S', '10', 'Q', '9'],
+#                ['10', '9', '9', 'K', 'Q', '9'],
+#                ['A', 'S', 'Q', 'J', '9', 'Q'],
+#                     ['9', 'S', 'J', 'J']]
+# block_list = [[0, 4, 5, 1, 'J'], [5, 2, 4, 1, 'Q']]
+# 单个block 格式 [5, 1, 2, 1, 'S']  [reel_index, block_begin_index, block_end_index, block_type, block_tuan]
+# win_result:[['J', 1, 0], ['9', 1, 8, 3, 1, 3, 3, 2160], ['Q', 2, 1, 2, 0], ['K', 1, 3, 1, 1, 2, 180], ['10', 1, 0], ['A', 1, 0]]
+def update_tuan_matrix_with_X(tuan_matrix, block_list, win_result):
+    pprint("****package:" + PACKAGE_NAME + "  ****funtion:update_tuan_matrix_with_X, old tuan matrix:" + str(tuan_matrix))
+
 
 ########################  以下是单元测试用到的代码 ########################
 ########################           测试用例1    ########################

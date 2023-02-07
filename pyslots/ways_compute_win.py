@@ -30,7 +30,8 @@ def pprint(str):
 #     'S': [0, 0, 0, 2, 5,10],
 # }
 # with_header 为True，表示上面还有一行，否则就没有。
-# all_tuan = [['J', 'Q', '9', 'A', 'W', 'S'],
+# tuan_matrix =
+#            [['J', 'Q', '9', 'A', 'W', 'S'],
 #             ['9', 'K', 'W', 'J', 'Q', '9'],
 #             ['Q', 'M', 'S', 'A', 'W', 'Q'],
 #             ['K', 'K', '10', '9', '10', 'J'],
@@ -41,27 +42,27 @@ def pprint(str):
 #   上面的 ['9', 'S', 'J', 'J']就是有header的情况
 #  输出的结果：[['J', 1, 0], ['9', 1, 8, 3, 1, 3, 3, 2160], ['Q', 2, 1, 2, 0], ['K', 1, 3, 1, 1, 2, 180], ['10', 1, 0], ['A', 1, 0]]
 #  ['9', 1, 8, 3, 1, 3, 3, 2160]表示'9'在每个REEL依次出现了1,8,3,1,3,3次，总中奖金额为720
-def compute_win_for_all_tuan(all_tuan, pl_map, with_header):
-    all_tuan_by_reel = []
-    for reel_index in range(len(all_tuan[0])):
-        rows = len(all_tuan)
+def compute_win_for_tuan_matrix(tuan_matrix, pl_map, with_header):
+    tuan_matrix_by_reel = []
+    for reel_index in range(len(tuan_matrix[0])):
+        rows = len(tuan_matrix)
         reel_tuan = []
         if with_header:
-            rows = len(all_tuan) - 1
+            rows = len(tuan_matrix) - 1
         for row in range(rows):
-            reel_tuan.append(all_tuan[row][reel_index])
+            reel_tuan.append(tuan_matrix[row][reel_index])
             if with_header:
-                if reel_index >=1 and reel_index < len(all_tuan[0]) - 1:
-                    reel_tuan.append(all_tuan[rows][reel_index -1])
-        all_tuan_by_reel.append(reel_tuan)
-    pprint(all_tuan_by_reel)
+                if reel_index >=1 and reel_index < len(tuan_matrix[0]) - 1:
+                    reel_tuan.append(tuan_matrix[rows][reel_index -1])
+        tuan_matrix_by_reel.append(reel_tuan)
+    pprint(tuan_matrix_by_reel)
     result_list = []
-    for tuan in all_tuan_by_reel[0]:
+    for tuan in tuan_matrix_by_reel[0]:
         result = [tuan]
         if tuan in [value[0] for value in result_list]:# 已经计算这个图案的中奖情况了
             continue
         # 统计每一个REEL上面出现的连续图案树木
-        for reel in all_tuan_by_reel:
+        for reel in tuan_matrix_by_reel:
             count = reel.count(tuan) + reel.count('W')
             if count > 0:
                 result.append(count)
@@ -78,7 +79,7 @@ def compute_win_for_all_tuan(all_tuan, pl_map, with_header):
     return result
 
 
-UNIT_TEST_ALL_TUAN = [ ['J', 'Q', '9', 'A', 'W', 'S'],
+UNIT_TEST_TUAN_MATRIX = [ ['J', 'Q', '9', 'A', 'W', 'S'],
                        ['9', 'K', 'W', 'J', 'Q', '9'],
                        ['Q', 'M', 'S', 'A', 'W', 'Q'],
                        ['K', 'K', '10', '9', '10', 'J'],
@@ -97,4 +98,4 @@ PL_MAP = {
             'W': [0, 0, 15, 30, 50,80],
             'S': [0, 0, 0, 2, 5,10]}
 if __name__ == '__main__':
-    compute_win_for_all_tuan(UNIT_TEST_ALL_TUAN, PL_MAP, True)
+    compute_win_for_tuan_matrix(UNIT_TEST_TUAN_MATRIX, PL_MAP, True)

@@ -7,7 +7,7 @@
 @Software:   slot
 @File    :   ways_create_tuan.py
 @Time    :   2023/2/7 11:10
-@Desc    :
+@Desc    :   专门用来生成ways game的每一局的图案，包括combo1/combo2等所有的combo
 '''
 
 import random
@@ -47,7 +47,7 @@ def create_array_by_rowandcol(row,col):
 
 # 按照给定的权重随机生成一个图案矩阵，这个仅限于生成每一局的combo1的图案
 # 即从0开始，没有任何先决条件，生成一个图案矩阵
-def create_all_tuan(tuan_list, quanzhong_list, row, col):
+def create_tuan_matrix(tuan_list, quanzhong_list, row, col):
     reel_all_tuan = create_array_by_rowandcol(row, col)
     for index, value1 in enumerate(quanzhong_list):
         reel_tuan = create_one_reel_tuan(tuan_list, value1, row)
@@ -150,8 +150,8 @@ UNIT_TEST_QUANZHONG_LIST_REELS = ((10, 5, 25, 10, 20, 12, 0, 5),
                                   (50, 15, 25, 10, 20, 0, 20, 10),
                                   (0, 15, 25, 10, 20, 20, 30, 10))
 
-def UNIT_TEST_create_all_tuan(src_tuan_list, src_quanzhong_list, row, col):
-    tuan_list = create_all_tuan(src_tuan_list, src_quanzhong_list, row, col)
+def UNIT_TEST_create_tuan_matrix(src_tuan_list, src_quanzhong_list, row, col):
+    tuan_list = create_tuan_matrix(src_tuan_list, src_quanzhong_list, row, col)
     tuan_count = 0
     pprint("****package:" + PACKAGE_NAME + "  ****funtion:UNIT_TEST_create_all_tuan, new tuan matrix:" + str(tuan_list))
     # 首先测试一下，看有没有非法图案，即所有图案都是图案数组中的
@@ -206,8 +206,8 @@ if __name__ == '__main__':
     # 跑1000次，确保测试结果ok
     print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例1")
     for i in range(1000):
-        UNIT_TEST_create_all_tuan(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 3, 5)
-        UNIT_TEST_create_all_tuan(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 4, 5)
+        UNIT_TEST_create_tuan_matrix(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 3, 5)
+        UNIT_TEST_create_tuan_matrix(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 4, 5)
     print("ok")
     # UNIT_TEST_create_one_block( UNIT_TEST_REEL_INDEX_LIST, UNIT_TEST_REEL_INDEX_QUANZHONG_LIST,
     #                             UNIT_TEST_BLOCK_LENGTH_LIST, UNIT_TEST_BLOCK_LENGTH_QUANZHONG_LIST,

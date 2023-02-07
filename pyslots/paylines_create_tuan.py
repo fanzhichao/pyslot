@@ -46,7 +46,7 @@ def create_array_by_rowandcol(row,col):
 
 # 按照给定的权重随机生成一个图案矩阵，这个仅限于生成每一局的combo1的图案
 # 即从0开始，没有任何先决条件，生成一个图案矩阵
-def create_all_tuan(tuan_list, quanzhong_list, row, col):
+def create_tuan_matrix(tuan_list, quanzhong_list, row, col):
     reel_all_tuan = create_array_by_rowandcol(row, col)
     for index, value1 in enumerate(quanzhong_list):
         reel_tuan = create_one_reel_tuan(tuan_list, value1, row)
@@ -56,9 +56,9 @@ def create_all_tuan(tuan_list, quanzhong_list, row, col):
 
 # 根据当前的图案矩阵、中奖结果和支付线的位置，把中奖的图案替换为'X'，以便后续处理
 # 这个是生成combo2/combo3.../comboN的第1步（连续消除后的新图案矩阵）
-def update_all_tuan_with_X(old_all_tuan, win_result,paylines):
+def update_tuan_matrix_with_X(old_all_tuan, win_result,paylines):
     # 把所有中奖图案替换为 'X'
-    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_all_tuan_with_X, old tuan:"+str(old_all_tuan))
+    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_tuan_matrix_with_X, old tuan:"+str(old_all_tuan))
     for single_payline_win_result in win_result[0]:
         line_number = single_payline_win_result[-1]
         lianxu_tuan_nums = single_payline_win_result[1]
@@ -67,7 +67,7 @@ def update_all_tuan_with_X(old_all_tuan, win_result,paylines):
             i,j = single_payline[index]
             old_all_tuan[i][j] = 'X'
     # 记录每一个REEL有多少个'X'，然后生成相应的新图案，然后合成新的REEL
-    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_all_tuan_with_X, new tuan with 'X':"+str(old_all_tuan))
+    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_tuan_matrix_with_X, new tuan with 'X':"+str(old_all_tuan))
     return old_all_tuan
 
 # 这个是生成combo2/combo3.../comboN的第2步（连续消除后的新图案矩阵），具体分为3步:
@@ -128,8 +128,8 @@ UNIT_TEST_QUANZHONG_LIST_REELS = ((10, 5, 25, 10, 20, 12, 0, 5),
                                   (0, 15, 25, 10, 20, 20, 30, 10))
 
 
-def UNIT_TEST_create_all_tuan(src_tuan_list, src_quanzhong_list, row, col):
-    tuan_list = create_all_tuan(src_tuan_list, src_quanzhong_list, row, col)
+def UNIT_TEST_create_tuan_matrix(src_tuan_list, src_quanzhong_list, row, col):
+    tuan_list = create_tuan_matrix(src_tuan_list, src_quanzhong_list, row, col)
     tuan_count = 0
     pprint("****package:" + PACKAGE_NAME + "  ****funtion:UNIT_TEST_create_all_tuan, new tuan matrix:" + str(tuan_list))
     # 首先测试一下，看有没有非法图案，即所有图案都是图案数组中的
@@ -171,8 +171,8 @@ UNIT_TEST_RESULT_TUAN_AFTER_UP_X_1 = [['X', '10', '9', 'J', '10'], ['9', 'X', 'Q
 UNIT_TEST_WIN_RESUT2 = [[['K', 3, 5, 1], ['J', 4, 10, 3]], 4]
 UNIT_TEST_RESULT_TUAN_AFTER_UP_X_2 = [['X', '10', 'X', 'J', '10'], ['9', 'X', 'Q', '9', 'K'], ['X', 'A', 'X', 'X', 'S']]
 
-def UNIT_TEST_update_all_tuan_with_X(old_tuan, win_result, pay_lines, result):
-    new_tuan = update_all_tuan_with_X(old_tuan, win_result, pay_lines)
+def UNIT_TEST_update_tuan_matrix_with_X(old_tuan, win_result, pay_lines, result):
+    new_tuan = update_tuan_matrix_with_X(old_tuan, win_result, pay_lines)
     for i, row in enumerate(new_tuan):
         for j in range(len(row)):
             assert new_tuan[i][j] == result[i][j]
@@ -198,11 +198,11 @@ if __name__ == '__main__':
     # 跑1000次，确保测试结果ok
     print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例1")
     for i in range(1000):
-        UNIT_TEST_create_all_tuan(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 3, 5)
-        UNIT_TEST_create_all_tuan(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 4, 5)
+        UNIT_TEST_create_tuan_matrix(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 3, 5)
+        UNIT_TEST_create_tuan_matrix(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 4, 5)
     print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例2")
-    UNIT_TEST_update_all_tuan_with_X(UNIT_TEST_OLD_ALL_TUAN, UNIT_TEST_WIN_RESUT1, UNIT_TEST_PAYLINES, UNIT_TEST_RESULT_TUAN_AFTER_UP_X_1)
-    UNIT_TEST_update_all_tuan_with_X(UNIT_TEST_OLD_ALL_TUAN, UNIT_TEST_WIN_RESUT2, UNIT_TEST_PAYLINES, UNIT_TEST_RESULT_TUAN_AFTER_UP_X_2)
+    UNIT_TEST_update_tuan_matrix_with_X(UNIT_TEST_OLD_ALL_TUAN, UNIT_TEST_WIN_RESUT1, UNIT_TEST_PAYLINES, UNIT_TEST_RESULT_TUAN_AFTER_UP_X_1)
+    UNIT_TEST_update_tuan_matrix_with_X(UNIT_TEST_OLD_ALL_TUAN, UNIT_TEST_WIN_RESUT2, UNIT_TEST_PAYLINES, UNIT_TEST_RESULT_TUAN_AFTER_UP_X_2)
     print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例3")
     UNIT_TEST_update_X_with_new_tuan(UNIT_TEST_OLD_TUAN1, UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, UNIT_TEST_NEW_TUAN1)
     UNIT_TEST_update_X_with_new_tuan(UNIT_TEST_OLD_TUAN2, UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, UNIT_TEST_NEW_TUAN2)

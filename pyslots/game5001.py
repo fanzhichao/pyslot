@@ -74,7 +74,7 @@ if __name__ == '__main__':
     progress_bar = tqdm(total = num)
     for i in range(10):
         total_win = 0
-        all_tuan = create_tuan.create_all_tuan(TUAN_LIST, QUANZHONG_LIST_REELS, 3, 5)
+        all_tuan = create_tuan.create_tuan_matrix(TUAN_LIST, QUANZHONG_LIST_REELS, 3, 5)
         win_res = compute_win.compute_win_for_all_tuan(all_tuan, PAYLINES, TUAN_PL_MAP)
 
         #pprint("****package:"+PACKAGE_NAME + "  ****funtion main:"+ str(win_res))
@@ -87,7 +87,7 @@ if __name__ == '__main__':
             single_combo_result = [win_res, all_tuan]
             result.append(single_combo_result)
             # 重新生成新的comobo的图案
-            old_all_tuan_with_X = create_tuan.update_all_tuan_with_X(all_tuan, win_res, PAYLINES)
+            old_all_tuan_with_X = create_tuan.update_tuan_matrix_with_X(all_tuan, win_res, PAYLINES)
             all_tuan = create_tuan.update_X_with_new_tuan(old_all_tuan_with_X, TUAN_LIST, QUANZHONG_LIST_REELS)
             win_res = compute_win.compute_win_for_all_tuan(all_tuan, PAYLINES, TUAN_PL_MAP)
             #pprint("****package:" + PACKAGE_NAME + "  ****funtion main: win_res " + str(win_res))

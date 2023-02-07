@@ -7,7 +7,7 @@
 @Software:   slot
 @File    :   ways_compute_win.py
 @Time    :   2023/2/7 16:42
-@Desc    :
+@Desc    :   专门用来计算ways游戏中，每局图案的中奖情况。
 '''
 import pandas
 

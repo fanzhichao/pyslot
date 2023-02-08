@@ -70,7 +70,7 @@ def compute_win_for_single_payline(single_pay_line_list, pl_map):
 # private方法，仅供get_result_for_all_tuan调用
 # 根据所有图案和单条支付线，生成单条支付线的图案调用
 # 返回结果: ['9', 'W', '9', '9', 'W']
-def get_single_payline_from_all_tuan(all_tuan, single_payline):
+def get_single_payline_from_tuan_matrix(all_tuan, single_payline):
     result = []
     for value in single_payline:
         result.append(all_tuan[value[0]][value[1]])
@@ -81,11 +81,11 @@ def get_single_payline_from_all_tuan(all_tuan, single_payline):
 # 输出结果：
 # [[['K', 3, 5, 0]], 5] line0中奖了
 # [[], 0]  没有payline中奖
-def compute_win_for_all_tuan(all_tuan, paylines, pl_map):
+def compute_win_for_tuan_matrix(all_tuan, paylines, pl_map):
     result = []
     total_odd = 0
     for index,payline in enumerate(paylines):
-        single_payline_tuan = get_single_payline_from_all_tuan(all_tuan, payline)
+        single_payline_tuan = get_single_payline_from_tuan_matrix(all_tuan, payline)
         singleline_result = compute_win_for_single_payline(single_payline_tuan, pl_map)
         if singleline_result[2] > 0:
             singleline_result.append(index)
@@ -136,14 +136,14 @@ UNIT_TEST_PAYLINES2 = [ [(1, 0), (3, 1), (0, 2), (3, 3), (0, 4), (2, 5)],
                         [(2, 0), (0, 1), (0, 2), (2, 3), (0, 4), (2, 5)],
                         [(2, 0), (0, 1), (1, 2), (2, 3), (1, 4), (2, 5)],]
 UNIT_TEST_WIN_RESUT2 = [[['9', 4, 2, 1], ['J', 3, 2, 2]], 4]
-def UNIT_TEST_compute_win_for_all_tuan(all_tuan, paylines, pl_map, result):
-    res = compute_win_for_all_tuan(all_tuan, paylines, pl_map)
+def UNIT_TEST_compute_win_for_tuan_matrix(all_tuan, paylines, pl_map, result):
+    res = compute_win_for_tuan_matrix(all_tuan, paylines, pl_map)
     assert res == result
 
 if __name__ == '__main__':
     print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例1")
     UNIT_TEST_compute_win_for_single_payline(UNIT_TEST_ALL_TUAN_LIST, UNIT_TEST_TUAN_PL_MAP, UNIT_TEST_RESULT_LIST)
     print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例2")
-    UNIT_TEST_compute_win_for_all_tuan(UNIT_TEST_TUAN1, UNIT_TEST_PAYLINES1, UNIT_TEST_TUAN_PL_MAP, UNIT_TEST_WIN_RESUT1)
-    UNIT_TEST_compute_win_for_all_tuan(UNIT_TEST_TUAN2, UNIT_TEST_PAYLINES2, UNIT_TEST_TUAN_PL_MAP,
+    UNIT_TEST_compute_win_for_tuan_matrix(UNIT_TEST_TUAN1, UNIT_TEST_PAYLINES1, UNIT_TEST_TUAN_PL_MAP, UNIT_TEST_WIN_RESUT1)
+    UNIT_TEST_compute_win_for_tuan_matrix(UNIT_TEST_TUAN2, UNIT_TEST_PAYLINES2, UNIT_TEST_TUAN_PL_MAP,
                                        UNIT_TEST_WIN_RESUT2)

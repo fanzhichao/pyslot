@@ -34,7 +34,49 @@ def get_pl_from_excel(excel_file_name):
         pprint("****package:" + PACKAGE_NAME + "  ****funtion:get_pl_from_excel, total peilv is:" + str(sum_gl))
     return pl_list, gl_list, pl_need_num_list
 
+# tuan_matrix， 需要被转置的矩阵
+# reverse_reel，在翻转矩阵前，是否需要先将每列的图案倒过来
+# 在paylines_create_tuan的update_X_with_new_tuan方法中，
+# 需要将一个REEL先倒过来,再转置
+def swap_matrix(tuan_matrix, reverse_reel = False):
+    print(tuan_matrix)
+    rows = len(tuan_matrix)
+    cols = len(tuan_matrix[0])
+    if reverse_reel:
+        tuan_matrix = [row[::-1] for row in tuan_matrix]
+    new_tuan_matrix = []
+    for i in range(cols):
+        single_row_tuan = []
+        for j in range(rows):
+            single_row_tuan.append(tuan_matrix[j][i])
+        new_tuan_matrix.append(single_row_tuan)
+
+    print(new_tuan_matrix)
+    return new_tuan_matrix
+
+
+
+########################  以下是单元测试用到的代码 ########################
+########################           测试用例1    ########################
+UNIT_TEST_MATRIX = [ ['9','S','K','9','J'],
+                     ['J','Q','10','A','S'],
+                     ['A','W','A','Q','10']]
+UNIT_TEST_MATRIX_SWAP              = [['9','J','A'],
+                                     ['S','Q','W'],
+                                     ['K','10','A'],
+                                     ['9','A','Q'],
+                                     ['J','S','10']]
+UNIT_TEST_MATRIX_SWAP_REVERSE_REEL = [['J','S','10'],
+                                     ['9','A','Q'],
+                                     ['K','10','A'],
+                                     ['S','Q','W'],
+                                     ['9','J','A']]
+def UNIT_TEST_swap_matrix(tuan_matrix, reverse_reel,result):
+    new_tuan_matrix = swap_matrix(tuan_matrix, reverse_reel)
+    assert new_tuan_matrix == result
 if __name__ == '__main__':
     # 测试读取excel
     EXCEL_NAME_READ_PV = r"d:py\\1.xlsx"
     # get_pl_from_excel(EXCEL_NAME_READ_PV)
+    UNIT_TEST_swap_matrix(UNIT_TEST_MATRIX, False, UNIT_TEST_MATRIX_SWAP)
+    UNIT_TEST_swap_matrix(UNIT_TEST_MATRIX, True, UNIT_TEST_MATRIX_SWAP_REVERSE_REEL)

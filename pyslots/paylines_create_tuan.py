@@ -11,9 +11,10 @@
 '''
 import random
 import pytest
+import tools
 from tqdm import tqdm
 
-DEBUG_ON = False
+DEBUG_ON = True
 PACKAGE_NAME = 'paylines_create_tuan'
 
 def pprint(str):
@@ -76,15 +77,7 @@ def update_tuan_matrix_with_X(tuan_matrix, win_result,paylines):
 # 3. 接着生成新的图案，继续填补'X'图案被消除后留下的空间
 def update_X_with_new_tuan(tuan_matrix_with_X, tuan_list, quanzhong_list):
     # 先将矩阵进行X Y转置，行和列换过来，从3 * 5 变成 5 * 3
-    mid_tuan_matrix_with_X     = []    # 保存中间数据
-    single_reel_tuan        = []    # 临时保存每个REEL上的数据
-    rows = len(tuan_matrix_with_X)
-    cols = len(tuan_matrix_with_X[0])
-    for i in range(cols):
-        single_reel_tuan = []
-        for j in range(rows):
-            single_reel_tuan.append(tuan_matrix_with_X[j][i])
-        mid_tuan_matrix_with_X.append(single_reel_tuan)
+    mid_tuan_matrix_with_X = tools.swap_matrix(tuan_matrix_with_X, False)
     pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new matrix tuan:" + str(mid_tuan_matrix_with_X))
 
     # 生成新的随机图案，替换掉需要消除的图案，也就是被标记为'X'的图案
@@ -92,10 +85,8 @@ def update_X_with_new_tuan(tuan_matrix_with_X, tuan_list, quanzhong_list):
     mid_tuan_matrix_after_upate_X = [] # 保存中间数据，将'X'删掉后重新填充的图案矩阵
     for index, value in enumerate(mid_tuan_matrix_with_X): # 遍历每一个REEL
         reel_X_count = value.count('X')
-        reel_tuan = []  # 用来保存填充后的每一个REEL的图案数据
-        for i in range(len(value) - 1, -1, -1): # 倒着收集每个REEL上不为'X'的数据
-            if 'X' != value[i]:
-                reel_tuan.append(value[i])
+        # 倒着收集每个REEL上不为'X'的数据, 最终会变成填充后的每一个REEL的图案数据
+        reel_tuan = [v for v in reversed(value) if 'X' != v]
         pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, old single reel:" + str(reel_tuan))
         if reel_X_count > 0:        # 如果这一列有'X'，即需要填充新的图案
             reel_add_tuan = create_one_reel_tuan(tuan_list, quanzhong_list[index], reel_X_count)
@@ -104,14 +95,8 @@ def update_X_with_new_tuan(tuan_matrix_with_X, tuan_list, quanzhong_list):
         mid_tuan_matrix_after_upate_X.append(reel_tuan)
     pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new tuan after update X:" + str(mid_tuan_matrix_after_upate_X))
 
-    # 重新转置，得到最终的新图案
-    new_tuan = []
-    single_row_tuan = []
-    for j in range(rows - 1, -1, -1): # 在这里，再把每个REEL的数据倒过来
-        single_row_tuan = []
-        for i in range(cols):
-            single_row_tuan.append(mid_tuan_matrix_after_upate_X[i][j])
-        new_tuan.append(single_row_tuan)
+    # 将矩阵重新转置一下，同时在转置前先将每个REEL上的数据倒过来
+    new_tuan = tools.swap_matrix(mid_tuan_matrix_after_upate_X, True)
     pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new tuan at last:" + str(new_tuan))
     return new_tuan
 

@@ -12,9 +12,10 @@
 
 import random
 import pytest
+import tools
 from tqdm import tqdm
 
-DEBUG_ON = False
+DEBUG_ON = True
 PACKAGE_NAME = 'ways_create_tuan'
 
 def pprint(str):
@@ -35,27 +36,20 @@ def pprint(str):
 def create_one_reel_tuan(src_tuan_list, quanzhong_list,tuan_num):
     return random.choices(src_tuan_list, quanzhong_list, k=tuan_num)
 
-# 创建一个二维数组，用来保存生成的图案矩阵，每个图案的初始值都是'X'
-def create_array_by_rowandcol(row,col):
-    data = []
-    for i in range(row):
-        row_data = []
-        for j in range(col):
-            row_data.append('X') # 默认用'X'图案填充整个图案矩阵
-        data.append(row_data)
-    return data
 
 # 按照给定的权重随机生成一个图案矩阵，这个仅限于生成每一局的combo1的图案
 # 即从0开始，没有任何先决条件，生成一个图案矩阵
-def create_tuan_matrix(tuan_list, quanzhong_list, row, col):
-    reel_all_tuan = create_array_by_rowandcol(row, col)
+def create_tuan_matrix_without_header(tuan_list, quanzhong_list, row, col):
+    reel_all_tuan = tools.create_array_by_rowandcol(row, col)
     for index, value1 in enumerate(quanzhong_list):
         reel_tuan = create_one_reel_tuan(tuan_list, value1, row)
         for j, value2 in enumerate(reel_tuan):
             reel_all_tuan[j][index] = value2
     return reel_all_tuan
 
-
+def create_header(header_tuan_list, header_quanzhong, header_len):
+    res = create_one_reel_tuan(header_tuan_list, header_quanzhong, header_len)
+    return res
 # 连续块的数据格式如下：
 # [reel_index, block_begin_index, block_end_index, block_type, block_tuan]
 #[2, 2, 3, 1, 'K'] 第3个REEL中，从上到下第[3,4,5]三个位置的'K'是一个连续块，其类型为1,也就是银框
@@ -70,15 +64,15 @@ def create_tuan_matrix(tuan_list, quanzhong_list, row, col):
 # block_type_quanzhong_list  [10,5,2] 对应上面的数组，表示对应的block种类的权重为
 def create_one_block(reel_index_list, reel_index_quanzhong_list, block_length_list, block_length_quanzhong_list,
                       block_type_list, block_type_quanzhong_list, tuan_list, tuan_quanzhong_list,
-                      row_len):
+                      reel_len):
     reel_index = random.choices(reel_index_list, reel_index_quanzhong_list, k=1)[0]
     block_length = random.choices(block_length_list, block_length_quanzhong_list, k=1)[0]
     block_type = random.choices(block_type_list, block_type_quanzhong_list, k=1)[0]
     tuan = random.choices(tuan_list, tuan_quanzhong_list, k=1)[0]
-    if block_length >= row_len:
+    if block_length >= reel_len:
         return []
     else:
-        block_start_index = random.randrange(0, row_len - block_length + 1)
+        block_start_index = random.randrange(0, reel_len - block_length + 1)
         res = [reel_index, block_start_index, block_start_index + block_length - 1, block_type, tuan]
         return res
 
@@ -94,15 +88,17 @@ def is_two_block_conflict(block1, block2):
 
 # 随机创建一个block列表，里面的block不会冲突
 def create_block_list(block_num_list, block_num_quanzhong_list,
-                      reel_index_list, reel_index_quanzhong_list, block_length_list, block_length_quanzhong_list,
-                      block_type_list, block_type_quanzhong_list, tuan_list, tuan_quanzhong_list,
-                      row_len):
+                      reel_index_list, reel_index_quanzhong_list,
+                      block_length_list, block_length_quanzhong_list,
+                      block_type_list, block_type_quanzhong_list,
+                      tuan_list, tuan_quanzhong_list,
+                      reel_len):
     block_num = random.choices(block_num_list, block_num_quanzhong_list, k=1)[0]
     block_num_get = 0
     block_list = []
     while block_num_get < block_num:
         block = create_one_block(reel_index_list, reel_index_quanzhong_list, block_length_list, block_length_quanzhong_list,
-                                block_type_list, block_type_quanzhong_list, tuan_list, tuan_quanzhong_list, row_len)
+                                block_type_list, block_type_quanzhong_list, tuan_list, tuan_quanzhong_list, reel_len)
         if len(block_list) == 0:
             block_list.append(block)
             block_num_get = block_num_get + 1
@@ -116,29 +112,60 @@ def create_block_list(block_num_list, block_num_quanzhong_list,
                 block_list.append(block)
                 block_num_get = block_num_get + 1
     print(block_list)
+    return block_list
 
 
 # 用block_list的图案覆盖掉已经创建好的图案
-UNIT_TEST_TUAN = [['9', 'J', '9', '9', 'J', 'A'],
+UNIT_TEST_TUAN_WITHOUT_HEADER = [['9', 'J', '9', '9', 'J', 'A'],
                   ['Q', '10', 'K', 'A', 'S', 'A'],
                   ['Q', 'W', 'Q', '9', '10', 'A'],
                   ['9', 'J', '9', '9', 'J', 'A'],
                   ['Q', '10', 'K', 'A', 'S', 'A'],
                   ['Q', '10', 'K', 'A', 'S', 'A'],
                   ['Q', 'W', 'Q', '9', '10', 'A']]
+UNIT_TEST_TUAN_WITH_HEADER = [['9', 'J', '9', '9', 'J', 'A'],
+                  ['Q', '10', 'K', 'A', 'S', 'A'],
+                  ['Q', 'W', 'Q', '9', '10', 'A'],
+                  ['9', 'J', '9', '9', 'J', 'A'],
+                  ['Q', '10', 'K', 'A', 'S', 'A'],
+                  ['Q', '10', 'K', 'A', 'S', 'A'],
+                  ['Q', 'W', 'Q', '9', '10', 'A'],
+                       ['9', '10', '9', '10']]
 UNIT_TEST_BLOCK_LIST = [[0, 4, 5, 1, 'J'], [5, 2, 4, 1, 'Q']]
+
+# 更新不带header的普通matrix图案
 def updata_tuan_with_block_list(tuan, block_list):
-    print(tuan)
-    reel_num = len(tuan[0]) # 先获取有多少个REEL
+    print("updata_tuan_with_block_list old " + str(tuan))
+    print("updata_tuan_with_block_list old block_list " + str(block_list))
     for block in block_list:
         for j in range(block[1], block[2] + 1):
             tuan[j][block[0]] = block[4]
-    print(tuan)
+    print("updata_tuan_with_block_list new " + str(tuan))
     return tuan
+
+#  更新转置过后的matrix图案，此时是带header的
+#  因为有可能block升级以后会消失（拆开成为单个Wild图案）
+#  所以这里还需要返回一个新的new_block_list
+def updata_swap_tuan_with_block_list(tuan, block_list):
+    print(tuan)
+    new_block_list = []
+    for block in block_list:
+        block_need_to_save = True
+        for j in range(block[1], block[2] + 1):
+            if block[-2] > 2:  # 如果框已经升到第3级了，那么所有图案变成wild
+                tuan[block[0]][j] = 'W'
+                block_need_to_save = False
+            else:
+                tuan[block[0]][j] = block[4]
+        if block_need_to_save:
+            new_block_list.append(block)
+    print(tuan)
+    return [tuan, new_block_list]
 
 
 # 根据当前的图案矩阵、中奖结果，把中奖的图案替换为'X'，以便后续处理
 # 这个是生成combo2/combo3.../comboN的第1步（连续消除后的新图案矩阵）
+
 
 # tuan_matrix = [['J', 'Q', '9', 'A', 'W', 'S'],
 #                ['9', 'K', 'W', 'J', 'Q', '9'],
@@ -150,9 +177,84 @@ def updata_tuan_with_block_list(tuan, block_list):
 #                     ['9', 'S', 'J', 'J']]
 # block_list = [[0, 4, 5, 1, 'J'], [5, 2, 4, 1, 'Q']]
 # 单个block 格式 [5, 1, 2, 1, 'S']  [reel_index, block_begin_index, block_end_index, block_type, block_tuan]
-# win_result:[['J', 1, 0], ['9', 1, 8, 3, 1, 3, 3, 2160], ['Q', 2, 1, 2, 0], ['K', 1, 3, 1, 1, 2, 180], ['10', 1, 0], ['A', 1, 0]]
-def update_tuan_matrix_with_X(tuan_matrix, block_list, win_result):
+# win_result:[['J', 1, 0], ['9', 1, 2, 3, 1, 3, 3, 540], ['Q', 2, 1, 2, 0], ['K', 1, 3, 1, 1, 2, 180], ['10', 1, 0], ['A', 1, 0]]
+def update_tuan_matrix_with_X(tuan_matrix, block_list, win_result_list):
     pprint("****package:" + PACKAGE_NAME + "  ****funtion:update_tuan_matrix_with_X, old tuan matrix:" + str(tuan_matrix))
+    # 以下处理的都是带header的图案
+    # 先将图案去掉header后转置，再加上header，变成按REEL(列)组织的数据
+    # 然后将其中中奖的图案用‘X’替换掉
+    header = tuan_matrix[-1]
+    tuan_matrix_without_header = tuan_matrix[:-1:1]
+    swap_matrix_with_header = tools.swap_matrix_with_header(tuan_matrix)
+    for win_result in win_result_list:
+        if win_result[-1] > 0: # 只处理中奖图案
+            zhongjiang_tuan = win_result[0]
+            reel_end_index = len(win_result) -2
+            # 将中奖的所有图案替换为'X'
+            for i in range(0, reel_end_index):
+                swap_matrix_with_header[i] = tools.list_replace(swap_matrix_with_header[i], zhongjiang_tuan, 'X')
+                swap_matrix_with_header[i] = tools.list_replace(swap_matrix_with_header[i], 'W', 'X')
+                pprint("****package:" + PACKAGE_NAME + "  ****funtion:update_tuan_matrix_with_X, ****:" + str(
+                    swap_matrix_with_header[i]))
+    pprint("****package:" + PACKAGE_NAME + "  ****funtion:update_tuan_matrix_with_X, new matrix:"+ str(swap_matrix_with_header))
+
+    # 接下来，对block_list及图案进行处理。
+    # 如果该block不在中奖路径上，则不管它，否则，对其按游戏规则进行升级处理
+    swap_matrix_after_update_X = []
+    new_block_list = []
+    for win_result in win_result_list:
+        if win_result[-1] > 0: # 只处理中奖图案
+            zhongjiang_tuan = win_result[0]
+            reel_end_index = len(win_result) - 2
+            for block in block_list:
+                if block[-1] == zhongjiang_tuan and  block[0] < reel_end_index:
+                    # 对位于中奖区域的block进行升级处理
+                    block[-2] = block[-2] + 1
+            # 将之前可能被替换为'X'的图案再替换回来
+            [swap_matrix_after_update_X, new_block_list] = updata_swap_tuan_with_block_list(swap_matrix_with_header, block_list)
+    return [swap_matrix_after_update_X, new_block_list]
+
+
+# 这个是生成combo2/combo3.../comboN的第2步（连续消除后的新图案矩阵），具体分为3步:
+# 1. 将标记为'X'的图案先删掉
+# 2. 然后'X'的图案上面的图案往下面掉落
+# 3. 接着生成新的图案，继续填补'X'图案被消除后留下的空间
+# 注意: 和paylines_create_tuan.py不同的是，这个方法的第一个输入参数是转置后的矩阵
+# 另外，header需要单独处理，所以第1个参数是不包含header的
+def update_X_with_new_tuan(tuan_swap_matrix_with_X, tuan_list, quanzhong_list, header, header_quanzhong_list):
+    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, tuan_swap_matrix_with_X:" + str(tuan_swap_matrix_with_X))
+    # 生成新的随机图案，替换掉需要消除的图案，也就是被标记为'X'的图案
+    # 这里需要注意的是，图案是依次向下跌落的。所以对一个REEL的数据进行处理时，要先倒着来
+    mid_tuan_matrix_after_upate_X = [] # 保存中间数据，将'X'删掉后重新填充的图案矩阵
+    for index, value in enumerate(tuan_swap_matrix_with_X): # 遍历每一个REEL
+        reel_X_count = value.count('X')
+        # 倒着收集每个REEL上不为'X'的数据, 最终会变成填充后的每一个REEL的图案数据
+        reel_tuan = [v for v in reversed(value) if 'X' != v]
+        pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, old single reel:" + str(reel_tuan))
+        if reel_X_count > 0:        # 如果这一列有'X'，即需要填充新的图案
+            reel_add_tuan = create_one_reel_tuan(tuan_list, quanzhong_list[index], reel_X_count)
+            reel_tuan.extend(reel_add_tuan)
+        pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new single reel:" + str(reel_tuan))
+        mid_tuan_matrix_after_upate_X.append(reel_tuan)
+    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new tuan after update X:" + str(mid_tuan_matrix_after_upate_X))
+
+    # 将矩阵重新转置一下，同时在转置前先将每个REEL上的数据倒过来
+    new_tuan = tools.swap_matrix(mid_tuan_matrix_after_upate_X, True)
+    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new tuan at last:" + str(new_tuan))
+
+    # 接下来用同样的方式处理header
+    reel_X_count = header.count('X')
+    # 倒着收集每个REEL上不为'X'的数据, 最终会变成填充后的每一个REEL的图案数据
+    new_header = [v for v in reversed(header) if 'X' != v]
+    if reel_X_count > 0:  # 如果这一列有'X'，即需要填充新的图案
+        reel_add_tuan = create_one_reel_tuan(tuan_list, header_quanzhong_list, reel_X_count)
+        new_header.extend(reel_add_tuan)
+    return [new_tuan, new_header]
+
+
+
+
+
 
 
 ########################  以下是单元测试用到的代码 ########################
@@ -167,8 +269,8 @@ UNIT_TEST_QUANZHONG_LIST_REELS = ((10, 5, 25, 10, 20, 12, 0, 5),
                                   (50, 15, 25, 10, 20, 0, 20, 10),
                                   (0, 15, 25, 10, 20, 20, 30, 10))
 
-def UNIT_TEST_create_tuan_matrix(src_tuan_list, src_quanzhong_list, row, col):
-    tuan_list = create_tuan_matrix(src_tuan_list, src_quanzhong_list, row, col)
+def UNIT_TEST_create_tuan_matrix_without_header(src_tuan_list, src_quanzhong_list, row, col):
+    tuan_list = create_tuan_matrix_without_header(src_tuan_list, src_quanzhong_list, row, col)
     tuan_count = 0
     pprint("****package:" + PACKAGE_NAME + "  ****funtion:UNIT_TEST_create_all_tuan, new tuan matrix:" + str(tuan_list))
     # 首先测试一下，看有没有非法图案，即所有图案都是图案数组中的
@@ -207,7 +309,7 @@ UNIT_TEST_BLOCK_TYPE_LIST =  [0,1,2]
 UNIT_TEST_BLOCK_TYPE_QUANZHONG_LIST = [10,5,2]
 UNIT_TEST_BLOCK_NUM_LIST = [0, 1, 2, 3, 4]
 UNIT_TEST_BLOCK_NUM_QUANZHONG_LIST = [1, 1, 2, 2, 1]
-UNIT_TEST_ROW_LENGTH = 7
+UNIT_TEST_REEL_LENGTH = 7
 def UNIT_TEST_create_one_block(reel_index_list, reel_index_quanzhong_list,
                                 block_length_list, block_length_quanzhong_list,
                                 block_type_list, block_type_quanzhong_list,
@@ -219,12 +321,15 @@ def UNIT_TEST_create_one_block(reel_index_list, reel_index_quanzhong_list,
                             tuan_list, tuan_quanzhong_list, row_len)
         print(res)
 
+########################           测试用例3    ########################
+UNIT_TEST_WIN_RESULT_LIST = [['J', 1, 0], ['9', 1, 2, 3, 1, 3, 3, 540], ['Q', 2, 1, 2, 0], ['K', 1, 3, 1, 1, 2, 180], ['10', 1, 0], ['A', 1, 0]]
+
 if __name__ == '__main__':
     # 跑1000次，确保测试结果ok
     print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例1")
     for i in range(1000):
-        UNIT_TEST_create_tuan_matrix(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 3, 5)
-        UNIT_TEST_create_tuan_matrix(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 4, 5)
+        UNIT_TEST_create_tuan_matrix_without_header(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 3, 5)
+        UNIT_TEST_create_tuan_matrix_without_header(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 4, 5)
     print("ok")
     # UNIT_TEST_create_one_block( UNIT_TEST_REEL_INDEX_LIST, UNIT_TEST_REEL_INDEX_QUANZHONG_LIST,
     #                             UNIT_TEST_BLOCK_LENGTH_LIST, UNIT_TEST_BLOCK_LENGTH_QUANZHONG_LIST,
@@ -235,5 +340,7 @@ if __name__ == '__main__':
                       UNIT_TEST_REEL_INDEX_LIST, UNIT_TEST_REEL_INDEX_QUANZHONG_LIST,
                       UNIT_TEST_BLOCK_LENGTH_LIST, UNIT_TEST_BLOCK_LENGTH_QUANZHONG_LIST,
                       UNIT_TEST_BLOCK_TYPE_LIST, UNIT_TEST_BLOCK_TYPE_QUANZHONG_LIST,
-                      UNIT_TEST_TUAN_LIST, UNIT_TEST_TUAN_QUANZHONG_LIST, UNIT_TEST_ROW_LENGTH)
-    updata_tuan_with_block_list(UNIT_TEST_TUAN, UNIT_TEST_BLOCK_LIST)
+                      UNIT_TEST_TUAN_LIST, UNIT_TEST_TUAN_QUANZHONG_LIST, UNIT_TEST_REEL_LENGTH)
+    updata_tuan_with_block_list(UNIT_TEST_TUAN_WITHOUT_HEADER, UNIT_TEST_BLOCK_LIST)
+
+    update_tuan_matrix_with_X(UNIT_TEST_TUAN_WITH_HEADER, UNIT_TEST_BLOCK_LIST, UNIT_TEST_WIN_RESULT_LIST)

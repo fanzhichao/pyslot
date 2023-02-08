@@ -1,16 +1,18 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 '''
 @Author  :   Frank
 @License :   (C) Copyright 2019-2025, StarryFun
 @Contact :   fanzhichao1983@gmail.com
 @Software:   slot
-@File    :   game5001.py
-@Time    :   2022/6/8
-@Desc    :   这是一个标准的3*5的pay lines游戏的例子
+@File    :   6001.py
+@Time    :   2023/2/8 15:27
+@Desc    :   这是一个标准的ways 游戏的例子
 '''
 import time
 from tqdm import tqdm
-import paylines_compute_win as compute_win
-import paylines_create_tuan as create_tuan
+import ways_compute_win as compute_win
+import ways_create_tuan as create_tuan
 import tools
 DEBUG_ON = True
 PACKAGE_NAME = 'game5001'
@@ -27,32 +29,40 @@ GAME5001_EXCEL = r"d:py\\game5001.xlsx"
 #################  供生成图案用  ########################
 # 所有的图案
 TUAN_LIST = ['9', '10', 'J', 'Q', 'K', 'A', 'W', 'S']
-# 每个REEL上面的图案出现的权重
-QUANZHONG_LIST_REELS = ((0, 5, 25, 10, 20, 0, 0, 0),
+# 每个REEL上面的图案出现的权重，其元素个数必须和REEL_NUM相等
+TUAN_QUANZHONG_LIST = ((0, 5, 25, 10, 20, 0, 0, 0),
                         (0, 5, 25, 10, 20, 0, 0, 0),
                         (0, 5, 25, 10, 20, 0, 0, 0),
                         (50, 5, 25, 10, 20, 0, 0, 0),
+                        (50, 5, 25, 10, 20, 0, 0, 0),
                         (0, 5, 25, 10, 20, 0, 0, 0))
-#################  供生成图案用  ########################
+# header区域的权重
+HEADER_QUANZHONG = (0, 5, 25, 10, 20, 0, 0, 0)
 
 #################  供计算中奖情况用  ########################
 # 图案的赔率表
 TUAN_PL_MAP = {
-    '9' : [0, 0, 0, 2, 5],
-    '10': [0, 0, 0, 5, 10],
-    'J' : [0, 0, 0, 10, 15],
-    'Q' : [0, 0, 0, 15, 20],
-    'K' : [0, 0, 5, 20, 30],
-    'A' : [0, 0, 10, 25, 40],
-    'W' : [0, 0, 15, 30, 50],
-    'S' : [0, 0, 0, 2, 5],
+    '9' : [0, 0, 0, 2, 5, 10],
+    '10': [0, 0, 0, 5, 10, 20],
+    'J' : [0, 0, 0, 10, 15, 25],
+    'Q' : [0, 0, 0, 15, 20, 30],
+    'K' : [0, 0, 5, 20, 30, 40],
+    'A' : [0, 0, 10, 25, 40, 50],
+    'W' : [0, 0, 15, 30, 50,60],
+    'S' : [0, 0, 0, 2, 5, 10],
 }
-# 每条支付线对应的矩阵坐标位置
-PAYLINES = [[(0,0), (2,1), (0,2), (2,3), (2,4)],
-            [(2,0), (0,1), (1,2), (2,3), (2,4)],
-            [(1,0), (2,1), (2,2), (2,3), (2,4)],
-            [(0,0), (0,1), (1,2), (2,3), (2,4)]]
-#################  供计算中奖情况用  ########################
+BLOCK_TUAN_QUANZHONG = (0, 5, 25, 10, 20, 0, 0, 0)
+REEL_INDEX_LIST =  [0,1,2,3,4,5]
+REEL_INDEX_QUANZHONG_LIST = [1,2,2,5,10,10]
+BLOCK_LENGTH_LIST = [2,3,4]
+BLOCK_LENGTH_QUANZHONG_LIST = [10,5,2]
+BLOCK_TYPE_LIST =  [0,1,2]
+BLOCK_TYPE_QUANZHONG_LIST = [10,5,2]
+BLOCK_NUM_LIST = [0, 1, 2, 3, 4]
+BLOCK_NUM_QUANZHONG_LIST = [1, 1, 2, 2, 1]
+REEL_LENGTH = 7  # 去掉header的matrix的高度，rows
+REEL_NUM = 6     # 去掉header的matrix的宽度，cols
+
 
 def pl_is_match(pl, pl_to_match_list, index):
     if index == 0:
@@ -74,10 +84,18 @@ if __name__ == '__main__':
     progress_bar = tqdm(total = num)
     for i in range(10):
         total_win = 0
-        all_tuan = create_tuan.create_tuan_matrix(TUAN_LIST, QUANZHONG_LIST_REELS, 3, 5)
-        win_res = compute_win.compute_win_for_tuan_matrix(all_tuan, PAYLINES, TUAN_PL_MAP)
+        all_tuan = create_tuan.create_tuan_matrix_without_header(TUAN_LIST, TUAN_QUANZHONG_LIST, REEL_LENGTH, REEL_NUM)
+        block_list = create_tuan.create_block_list(BLOCK_NUM_LIST, BLOCK_NUM_QUANZHONG_LIST,
+                                                    REEL_INDEX_LIST, REEL_INDEX_QUANZHONG_LIST,
+                                                    BLOCK_LENGTH_LIST, BLOCK_LENGTH_QUANZHONG_LIST,
+                                                    BLOCK_TYPE_LIST, BLOCK_TYPE_QUANZHONG_LIST,
+                                                    TUAN_LIST, BLOCK_TUAN_QUANZHONG, REEL_LENGTH)
+        all_tuan = create_tuan.updata_tuan_with_block_list(all_tuan, block_list)
+        header = create_tuan.create_header(TUAN_LIST, HEADER_QUANZHONG, REEL_LENGTH - 2)
+        all_tuan.append(header)
+        win_res = compute_win.compute_win_for_tuan_matrix(all_tuan, TUAN_PL_MAP, True)
 
-        #pprint("****package:"+PACKAGE_NAME + "  ****funtion main:"+ str(win_res))
+        pprint("****package:"+PACKAGE_NAME + "  ****funtion main:"+ str(win_res))
 
         result = []
         single_combo_result = []
@@ -86,10 +104,12 @@ if __name__ == '__main__':
             total_win = total_win + win_res[-1]
             single_combo_result = [win_res, all_tuan]
             result.append(single_combo_result)
-            # 重新生成新的comobo的图案
-            old_all_tuan_with_X = create_tuan.update_tuan_matrix_with_X(all_tuan, win_res, PAYLINES)
-            all_tuan = create_tuan.update_X_with_new_tuan(old_all_tuan_with_X, TUAN_LIST, QUANZHONG_LIST_REELS)
-            win_res = compute_win.compute_win_for_tuan_matrix(all_tuan, PAYLINES, TUAN_PL_MAP)
+            # 重新生成新的combo的图案
+            [old_all_tuan_with_X, new_block_list] = create_tuan.update_tuan_matrix_with_X(all_tuan, block_list, win_res[:-1:1])
+            [all_tuan, new_header] = create_tuan.update_X_with_new_tuan(old_all_tuan_with_X, TUAN_LIST, TUAN_QUANZHONG_LIST, TUAN_LIST, HEADER_QUANZHONG)
+            all_tuan = create_tuan.updata_tuan_with_block_list(all_tuan, new_block_list)
+            all_tuan.append(new_header)
+            win_res = compute_win.compute_win_for_tuan_matrix(all_tuan, TUAN_PL_MAP, True)
             #pprint("****package:" + PACKAGE_NAME + "  ****funtion main: win_res " + str(win_res))
         # 记录最后一个不中奖的combo的数据
         single_combo_result = [win_res, all_tuan]
@@ -114,7 +134,4 @@ if __name__ == '__main__':
         # 如果已经生成了所有需要的组合，则退出程序
         if sum(pl_get_num_list) >= num:
             break
-
-
-
 

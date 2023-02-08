@@ -35,25 +35,18 @@ def pprint(str):
 def create_one_reel_tuan(src_tuan_list, quanzhong_list,tuan_num):
     return random.choices(src_tuan_list, quanzhong_list, k=tuan_num)
 
-# 创建一个二维数组，用来保存生成的图案矩阵，每个图案的初始值都是'X'
-def create_array_by_rowandcol(row,col):
-    data = []
-    for i in range(row):
-        row_data = []
-        for j in range(col):
-            row_data.append('X') # 默认用'X'图案填充整个图案矩阵
-        data.append(row_data)
-    return data
+
 
 # 按照给定的权重随机生成一个图案矩阵，这个仅限于生成每一局的combo1的图案
 # 即从0开始，没有任何先决条件，生成一个图案矩阵
 def create_tuan_matrix(tuan_list, quanzhong_list, row, col):
-    reel_all_tuan = create_array_by_rowandcol(row, col)
+    reel_all_tuan = tools.create_array_by_rowandcol(row, col)
     for index, value1 in enumerate(quanzhong_list):
         reel_tuan = create_one_reel_tuan(tuan_list, value1, row)
         for j, value2 in enumerate(reel_tuan):
             reel_all_tuan[j][index] = value2
     return reel_all_tuan
+
 
 # 根据当前的图案矩阵、中奖结果和支付线的位置，把中奖的图案替换为'X'，以便后续处理
 # 这个是生成combo2/combo3.../comboN的第1步（连续消除后的新图案矩阵）

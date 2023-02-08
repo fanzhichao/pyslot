@@ -10,7 +10,7 @@
 @Desc    :   专门用来计算ways游戏中，每局图案的中奖情况。
 '''
 import pandas
-
+import tools
 DEBUG_ON = True
 PACKAGE_NAME = 'ways_compute_win'
 
@@ -43,40 +43,43 @@ def pprint(str):
 #  输出的结果：[['J', 1, 0], ['9', 1, 8, 3, 1, 3, 3, 2160], ['Q', 2, 1, 2, 0], ['K', 1, 3, 1, 1, 2, 180], ['10', 1, 0], ['A', 1, 0]]
 #  ['9', 1, 8, 3, 1, 3, 3, 2160]表示'9'在每个REEL依次出现了1,8,3,1,3,3次，总中奖金额为720
 def compute_win_for_tuan_matrix(tuan_matrix, pl_map, with_header):
-    tuan_matrix_by_reel = []
-    for reel_index in range(len(tuan_matrix[0])):
-        rows = len(tuan_matrix)
-        reel_tuan = []
-        if with_header:
-            rows = len(tuan_matrix) - 1
-        for row in range(rows):
-            reel_tuan.append(tuan_matrix[row][reel_index])
-            if with_header:
-                if reel_index >=1 and reel_index < len(tuan_matrix[0]) - 1:
-                    reel_tuan.append(tuan_matrix[rows][reel_index -1])
-        tuan_matrix_by_reel.append(reel_tuan)
-    pprint(tuan_matrix_by_reel)
+    # 先得到转置，并且添加header后的图案
+    tuan_matrix_swap_add_header = []
+    if with_header:
+        tuan_matrix_swap_add_header = tools.swap_matrix_with_header(tuan_matrix)
+    else:
+        tuan_matrix_swap_add_header = tools.swap_matrix(tuan_matrix,False)
+
+    # 统计中奖情况，中奖图案必定出现在第一列
     result_list = []
-    for tuan in tuan_matrix_by_reel[0]:
+    total_odd = 0
+    for tuan in tuan_matrix_swap_add_header[0]:
         result = [tuan]
-        if tuan in [value[0] for value in result_list]:# 已经计算这个图案的中奖情况了
-            continue
-        # 统计每一个REEL上面出现的连续图案树木
-        for reel in tuan_matrix_by_reel:
-            count = reel.count(tuan) + reel.count('W')
-            if count > 0:
-                result.append(count)
-            else:
-                break
-        # 计算奖金
-        continue_count = len(result) - 1
-        jiangjing = pl_map[tuan][continue_count - 1]
-        for i in range(1, len(result)):
-            jiangjing = jiangjing * result[i]
-        result.append(jiangjing)
-        result_list.append(result)
+        # 只有这个图案没有统计过，才需要统计
+        print("result_list  "+str(result_list))
+        print("tuan " + str(tuan))
+        if tuan not in [value[0] for value in result_list]:
+            print("yes..........")
+            # 统计每一个REEL上面出现的连续图案数量
+            for reel in tuan_matrix_swap_add_header:
+                count = reel.count(tuan) + reel.count('W')
+                if count > 0:
+                    result.append(count)
+                else:
+                    break
+            # 计算奖金
+            continue_count = len(result) - 1
+            jiangjing = pl_map[tuan][continue_count - 1]
+            for i in range(1, len(result)):
+                jiangjing = jiangjing * result[i]
+            result.append(jiangjing)
+            total_odd = total_odd + jiangjing
+            # 只有该图案中奖了，才需要记录到中奖结果中
+            if jiangjing > 0:
+                result_list.append(result)
+    result_list.append(total_odd)
     pprint(result_list)
-    return result
+    return result_list
 
 
 UNIT_TEST_TUAN_MATRIX = [ ['J', 'Q', '9', 'A', 'W', 'S'],

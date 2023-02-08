@@ -34,6 +34,17 @@ def get_pl_from_excel(excel_file_name):
         pprint("****package:" + PACKAGE_NAME + "  ****funtion:get_pl_from_excel, total peilv is:" + str(sum_gl))
     return pl_list, gl_list, pl_need_num_list
 
+
+# 创建一个二维数组，用来保存生成的图案矩阵，每个图案的初始值都是'X'
+def create_array_by_rowandcol(row,col):
+    data = []
+    for i in range(row):
+        row_data = []
+        for j in range(col):
+            row_data.append('X') # 默认用'X'图案填充整个图案矩阵
+        data.append(row_data)
+    return data
+
 # tuan_matrix， 需要被转置的矩阵
 # reverse_reel，在翻转矩阵前，是否需要先将每列的图案倒过来
 # 在paylines_create_tuan的update_X_with_new_tuan方法中，
@@ -50,11 +61,21 @@ def swap_matrix(tuan_matrix, reverse_reel = False):
         for j in range(rows):
             single_row_tuan.append(tuan_matrix[j][i])
         new_tuan_matrix.append(single_row_tuan)
-
-    print(new_tuan_matrix)
     return new_tuan_matrix
 
+def swap_matrix_with_header(tuan_matrix):
+    # 前后两列补齐，一般来讲，Header比下面的matrix要少两列
+    header = ['X']+tuan_matrix[-1]+['X']
+    tuan_matrix_without_header = tuan_matrix[:-1:1]
+    new_matrix_without_header = swap_matrix(tuan_matrix_without_header, False)
+    for reel_index in range(len(new_matrix_without_header)):
+        if header[reel_index] != 'X': # 比较粗暴的判断方式，但是简单易懂
+            new_matrix_without_header[reel_index].append(header[reel_index])
+    return new_matrix_without_header
 
+def list_replace(src_list, old, replace):
+    src_list = [replace if x == old else x for x in src_list]
+    return src_list
 
 ########################  以下是单元测试用到的代码 ########################
 ########################           测试用例1    ########################
@@ -80,3 +101,4 @@ if __name__ == '__main__':
     # get_pl_from_excel(EXCEL_NAME_READ_PV)
     UNIT_TEST_swap_matrix(UNIT_TEST_MATRIX, False, UNIT_TEST_MATRIX_SWAP)
     UNIT_TEST_swap_matrix(UNIT_TEST_MATRIX, True, UNIT_TEST_MATRIX_SWAP_REVERSE_REEL)
+    swap_matrix_with_header(UNIT_TEST_MATRIX)

@@ -111,7 +111,7 @@ def create_block_list(block_num_list, block_num_quanzhong_list,
             if conflict_num == 0:
                 block_list.append(block)
                 block_num_get = block_num_get + 1
-    print(block_list)
+    pprint("****package:" + PACKAGE_NAME + "  ****function: create_block_list,  block_list  " + str(block_list))
     return block_list
 
 
@@ -135,19 +135,15 @@ UNIT_TEST_BLOCK_LIST = [[0, 4, 5, 1, 'J'], [5, 2, 4, 1, 'Q']]
 
 # 更新不带header的普通matrix图案
 def updata_tuan_with_block_list(tuan, block_list):
-    print("updata_tuan_with_block_list old " + str(tuan))
-    print("updata_tuan_with_block_list old block_list " + str(block_list))
     for block in block_list:
         for j in range(block[1], block[2] + 1):
             tuan[j][block[0]] = block[4]
-    print("updata_tuan_with_block_list new " + str(tuan))
     return tuan
 
 #  更新转置过后的matrix图案，此时是带header的
 #  因为有可能block升级以后会消失（拆开成为单个Wild图案）
 #  所以这里还需要返回一个新的new_block_list
 def updata_swap_tuan_with_block_list(tuan, block_list):
-    print(tuan)
     new_block_list = []
     for block in block_list:
         block_need_to_save = True
@@ -159,7 +155,8 @@ def updata_swap_tuan_with_block_list(tuan, block_list):
                 tuan[block[0]][j] = block[4]
         if block_need_to_save:
             new_block_list.append(block)
-    print(tuan)
+    pprint("****package:" + PACKAGE_NAME + "  ****function: updata_swap_tuan_with_block_list,  new_tuan  " + str(tuan))
+    pprint("****package:" + PACKAGE_NAME + "  ****function: updata_swap_tuan_with_block_list,  new_block_list  " + str(new_block_list))
     return [tuan, new_block_list]
 
 

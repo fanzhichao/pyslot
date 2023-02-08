@@ -56,10 +56,8 @@ def compute_win_for_tuan_matrix(tuan_matrix, pl_map, with_header):
     for tuan in tuan_matrix_swap_add_header[0]:
         result = [tuan]
         # 只有这个图案没有统计过，才需要统计
-        print("result_list  "+str(result_list))
-        print("tuan " + str(tuan))
+        # pprint("****package:"+PACKAGE_NAME + "compute_win_for_tuan_matrix  result_list  "+str(result_list))
         if tuan not in [value[0] for value in result_list]:
-            print("yes..........")
             # 统计每一个REEL上面出现的连续图案数量
             for reel in tuan_matrix_swap_add_header:
                 count = reel.count(tuan) + reel.count('W')
@@ -78,7 +76,7 @@ def compute_win_for_tuan_matrix(tuan_matrix, pl_map, with_header):
             if jiangjing > 0:
                 result_list.append(result)
     result_list.append(total_odd)
-    pprint(result_list)
+    pprint("****package:" + PACKAGE_NAME + "compute_win_for_tuan_matrix  result_list  " + str(result_list))
     return result_list
 
 

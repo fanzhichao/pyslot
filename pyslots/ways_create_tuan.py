@@ -135,12 +135,9 @@ UNIT_TEST_BLOCK_LIST = [[0, 4, 5, 1, 'J'], [5, 2, 4, 1, 'Q']]
 
 # 更新不带header的普通matrix图案
 def updata_tuan_with_block_list(tuan, block_list):
-    print("updata_tuan_with_block_list old " + str(tuan))
-    print("updata_tuan_with_block_list old block_list " + str(block_list))
     for block in block_list:
         for j in range(block[1], block[2] + 1):
             tuan[j][block[0]] = block[4]
-    print("updata_tuan_with_block_list new " + str(tuan))
     return tuan
 
 #  更新转置过后的matrix图案，此时是带header的
@@ -159,7 +156,8 @@ def updata_swap_tuan_with_block_list(tuan, block_list):
                 tuan[block[0]][j] = block[4]
         if block_need_to_save:
             new_block_list.append(block)
-    print(tuan)
+    pprint("****package:" + PACKAGE_NAME + "  ****function: updata_swap_tuan_with_block_list,  new_tuan  " + str(tuan))
+    pprint("****package:" + PACKAGE_NAME + "  ****function: updata_swap_tuan_with_block_list,  new_block_list  " + str(new_block_list))
     return [tuan, new_block_list]
 
 

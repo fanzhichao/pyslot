@@ -13,6 +13,7 @@ import random
 import pytest
 import tools
 from tqdm import tqdm
+from colored_logs.logger import Logger, LogType
 
 DEBUG_ON = False
 PACKAGE_NAME = 'paylines_create_tuan'

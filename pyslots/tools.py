@@ -72,7 +72,7 @@ def swap_matrix_with_header(tuan_matrix):
     tuan_matrix_without_header = tuan_matrix[:-1:1]
     new_matrix_without_header = swap_matrix(tuan_matrix_without_header, False)
     for reel_index in range(len(new_matrix_without_header)):
-        # 为'X'则代表是上面新加的元素，这个不用加到列里面
+        # 为'X'则代表是上面新加的元素，这个不用加到REEL对应的列里面
         if header[reel_index] != 'X':
             new_matrix_without_header[reel_index].append(header[reel_index])
     return new_matrix_without_header

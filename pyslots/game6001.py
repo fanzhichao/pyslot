@@ -15,8 +15,11 @@ import ways_compute_win as compute_win
 import ways_create_tuan as create_tuan
 import tools
 from copy import copy, deepcopy
+from colored_logs.logger import Logger, LogType
+
 DEBUG_ON = True
 PACKAGE_NAME = 'game6001'
+
 # just for test
 
 def pprint(str):
@@ -49,7 +52,7 @@ TUAN_QUANZHONG_LIST = ( (20, 10, 15, 10, 8, 16,  18, 12, 0, 0),
                         (20, 20, 15, 15, 12, 10, 12, 10, 8, 10))
 #  header区域的权重
 # 【必改】TUAN_LIST修改后，要增加或减少对应图案的权重，即cols要跟着变
-HEADER_QUANZHONG = (10, 20, 15, 10, 8, 6,  8, 6, 0, 0)
+HEADER_QUANZHONG = (8, 15, 20, 15, 8, 6,  8, 6, 0, 0)
 
 #################  供计算中奖情况用  ########################
 # 图案的赔率表
@@ -70,10 +73,11 @@ TUAN_PL_MAP = {
 
 # 以下定义都是针对block的，即游戏中出现的长条连续图案（一般包含2-4个图案）
 # 【必改】TUAN_LIST修改后，要增加或减少对应图案的权重，即cols要跟着变
-BLOCK_TUAN_QUANZHONG = (15, 20, 12, 10, 8, 6, 8, 6, 5, 5)
+# block 不能为'W' 或者 'S'
+BLOCK_TUAN_QUANZHONG = (15, 20, 12, 10, 8, 6, 8, 6, 0, 0)
 # 【可改】下面分别定义了block出现在第几个REEL上，及其权重
 REEL_INDEX_LIST =  [0,1,2,3,4,5]
-REEL_INDEX_QUANZHONG_LIST = [0,2,2,5,10,10]
+REEL_INDEX_QUANZHONG_LIST = [0,15,10,5,10,10]
 # 【可改】下面分别定义了block的长度（包含多少个图案），及其权重
 BLOCK_LENGTH_LIST = [2,3,4]
 BLOCK_LENGTH_QUANZHONG_LIST = [10,5,2]
@@ -86,50 +90,43 @@ BLOCK_NUM_QUANZHONG_LIST = [12, 5, 5, 2, 1]
 
 
 if __name__ == '__main__':
+    log = Logger(ID = PACKAGE_NAME)
     pl_list, gl_list, pl_need_num_list = tools.get_pl_from_excel(GAME6001_EXCEL)
     num = sum(pl_need_num_list) # 需要生成的组合总数
     pl_get_num_list = [0] * len(pl_need_num_list)  # 保存一下每个赔率得到了多少个组合
-    pprint("****package:" + PACKAGE_NAME + "  ****funtion main: 总共需要 "+str(num) + "个组合")
+    log.success("main: 总共需要 "+str(num) + "个组合")
     progress_bar = tqdm(total = num)
     # 跑多少组组合，一般来讲，跑满需要的赔率需要10W次以上
     for i in range(10):
-        pprint("\n")
-        pprint("1111****package:" + PACKAGE_NAME + "  ****funtion main, begin")
         total_win = 0
         all_tuan = create_tuan.create_tuan_matrix_without_header(TUAN_LIST, TUAN_QUANZHONG_LIST, REEL_LENGTH, REEL_NUM)
-        block_list = create_tuan.create_block_list(BLOCK_NUM_LIST, BLOCK_NUM_QUANZHONG_LIST,
+        new_block_list = create_tuan.create_block_list(BLOCK_NUM_LIST, BLOCK_NUM_QUANZHONG_LIST,
                                                     REEL_INDEX_LIST, REEL_INDEX_QUANZHONG_LIST,
                                                     BLOCK_LENGTH_LIST, BLOCK_LENGTH_QUANZHONG_LIST,
                                                     BLOCK_TYPE_LIST, BLOCK_TYPE_QUANZHONG_LIST,
                                                     TUAN_LIST, BLOCK_TUAN_QUANZHONG, REEL_LENGTH)
-        all_tuan = create_tuan.updata_tuan_with_block_list(all_tuan, block_list)
+        all_tuan = create_tuan.updata_tuan_with_block_list(all_tuan, new_block_list)
         header = create_tuan.create_header(TUAN_LIST, HEADER_QUANZHONG, REEL_NUM - 2)
         all_tuan.append(header)
         win_res = compute_win.compute_win_for_tuan_matrix(all_tuan, TUAN_PL_MAP, True)
-
-        pprint("2222****package:"+PACKAGE_NAME + "  ****funtion main:"+ str(win_res))
-
         result = []
         single_combo_result = []
         # check是否中奖，如果中奖了要继续生成和计算后面的combo图案
         while(win_res[-1] > 0):
             total_win = total_win + win_res[-1]
-            single_combo_result = [deepcopy(win_res), deepcopy(all_tuan)]
-            result.append(single_combo_result)
+            result.append([deepcopy(win_res), deepcopy(all_tuan), deepcopy(new_block_list)])
             # 重新生成新的combo的图案
-            [old_all_tuan_with_X, new_block_list] = create_tuan.update_tuan_matrix_with_X(all_tuan, block_list, win_res[:-1:1])
-            [all_tuan, new_header] = create_tuan.update_X_with_new_tuan(old_all_tuan_with_X, TUAN_LIST, TUAN_QUANZHONG_LIST, TUAN_LIST, HEADER_QUANZHONG)
+            [old_all_tuan_with_X, header_with_X, new_block_list] = create_tuan.update_tuan_matrix_with_X(all_tuan, new_block_list, win_res[:-1:1])
+            [all_tuan, new_header] = create_tuan.update_X_with_new_tuan(old_all_tuan_with_X, TUAN_LIST, TUAN_QUANZHONG_LIST, header_with_X, HEADER_QUANZHONG)
             all_tuan = create_tuan.updata_tuan_with_block_list(all_tuan, new_block_list)
-            all_tuan.append(new_header)
+            all_tuan.append(deepcopy(new_header))
             win_res = compute_win.compute_win_for_tuan_matrix(all_tuan, TUAN_PL_MAP, True)
-            pprint("3333****package:" + PACKAGE_NAME + "  ****funtion main: win_res " + str(win_res))
         # 记录最后一个不中奖的combo的数据
-        single_combo_result = [deepcopy(win_res), deepcopy(all_tuan)]
-        result.append(single_combo_result)
+        result.append([deepcopy(win_res), deepcopy(all_tuan), deepcopy(new_block_list)])
         combo_num = "combo "+str(len(result))
         result = [combo_num] + [total_win] + result
-        pprint("4444****package:"+PACKAGE_NAME + "  ****funtion main: 得到一局结果 "+ str(combo_num))
-        pprint("4444****package:" + PACKAGE_NAME + "  ****funtion main: 得到一局结果,详细数据是 " + str(result))
+        log.success("main: 得到一局结果 "+ str(combo_num))
+        pprint("main: 这一局的详细数据是 " + str(result))
 
         # 如果这一局中奖了，要看这局的中奖结果要加到哪里
         if total_win > 0 :
@@ -138,14 +135,13 @@ if __name__ == '__main__':
                     # 只有某个赔率没有满的时候，才需要添加
                     if pl_get_num_list[i] < pl_need_num_list[i]:
                         pl_get_num_list[i] = pl_get_num_list[i] + 1
-                        pprint("5555****package:" + PACKAGE_NAME + "  ****funtion main: 第 " + str(
-                            i) + " 个赔率已生成组合数 " + str(pl_get_num_list[i]) + "/" + str(pl_need_num_list[i]))
+                        log.success("main: 第" + str(
+                            i) + "个赔率已生成组合数 " + str(pl_get_num_list[i]) + "/" + str(pl_need_num_list[i]))
                         progress_bar.update(1)  # 进度条加1
         else:
             pl_get_num_list[0] = pl_get_num_list[0] + 1
             progress_bar.update(1)  # 进度条加1
-            pprint("5555****package:" + PACKAGE_NAME + "  ****funtion main: 第 1 个赔率已生成组合数 " + str(
-                pl_get_num_list[0]) + "/" + str(pl_need_num_list[0]))
+            log.success("main: 第1个赔率已生成组合数 " + str(pl_get_num_list[0]) + "/" + str(pl_need_num_list[0]))
 
         # 如果已经生成了所有需要的组合，则退出程序
         if sum(pl_get_num_list) >= num:

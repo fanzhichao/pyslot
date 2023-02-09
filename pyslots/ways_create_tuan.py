@@ -14,13 +14,14 @@ import random
 import pytest
 import tools
 from tqdm import tqdm
+from colored_logs.logger import Logger, LogType
 
 DEBUG_ON = False
 PACKAGE_NAME = 'ways_create_tuan'
-
+log = Logger(ID = PACKAGE_NAME)
 def pprint(str):
     if DEBUG_ON:
-        print(str)
+        log.warning(str)
 
 # 下面的数据仅用来举个例子，不代表真实的数据
 # 游戏包括哪些图案
@@ -111,7 +112,7 @@ def create_block_list(block_num_list, block_num_quanzhong_list,
             if conflict_num == 0:
                 block_list.append(block)
                 block_num_get = block_num_get + 1
-    pprint("****package:" + PACKAGE_NAME + "  ****function: create_block_list,  block_list  " + str(block_list))
+    log.warning("function: create_block_list,  block_list  " + str(block_list))
     return block_list
 
 
@@ -155,8 +156,8 @@ def updata_swap_tuan_with_block_list(tuan, block_list):
                 tuan[block[0]][j] = block[4]
         if block_need_to_save:
             new_block_list.append(block)
-    pprint("****package:" + PACKAGE_NAME + "  ****function: updata_swap_tuan_with_block_list,  new_tuan  " + str(tuan))
-    pprint("****package:" + PACKAGE_NAME + "  ****function: updata_swap_tuan_with_block_list,  new_block_list  " + str(new_block_list))
+    pprint("updata_swap_tuan_with_block_list, new_tuan  " + str(tuan))
+    pprint("updata_swap_tuan_with_block_list, new_block_list  " + str(new_block_list))
     return [tuan, new_block_list]
 
 
@@ -191,10 +192,9 @@ def update_tuan_matrix_with_X(tuan_matrix, block_list, win_result_list):
             for i in range(0, reel_end_index):
                 swap_matrix_with_header[i] = tools.list_replace(swap_matrix_with_header[i], zhongjiang_tuan, 'X')
                 swap_matrix_with_header[i] = tools.list_replace(swap_matrix_with_header[i], 'W', 'X')
-                pprint("****package:" + PACKAGE_NAME + "  ****funtion:update_tuan_matrix_with_X, ****:" + str(
-                    swap_matrix_with_header[i]))
-    pprint("****package:" + PACKAGE_NAME + "  ****funtion:update_tuan_matrix_with_X, new matrix:"+ str(swap_matrix_with_header))
-
+    pprint("update_tuan_matrix_with_X, new matrix:"+ str(swap_matrix_with_header))
+    header_with_X = [swap_matrix_with_header[i][-1] for i in range(1, len(swap_matrix_with_header) - 1)]
+    pprint("update_tuan_matrix_with_X, header_with_X:" + str(header_with_X))
     # 接下来，对block_list及图案进行处理。
     # 如果该block不在中奖路径上，则不管它，否则，对其按游戏规则进行升级处理
     swap_matrix_after_update_X = []
@@ -209,7 +209,13 @@ def update_tuan_matrix_with_X(tuan_matrix, block_list, win_result_list):
                     block[-2] = block[-2] + 1
             # 将之前可能被替换为'X'的图案再替换回来
             [swap_matrix_after_update_X, new_block_list] = updata_swap_tuan_with_block_list(swap_matrix_with_header, block_list)
-    return [swap_matrix_after_update_X, new_block_list]
+    swap_matrix_after_update_X_without_header = []
+    for value in swap_matrix_after_update_X:
+        if len(value) > len(swap_matrix_after_update_X[0]):
+            swap_matrix_after_update_X_without_header.append(value[:-1:1])
+        else:
+            swap_matrix_after_update_X_without_header.append(value)
+    return [swap_matrix_after_update_X_without_header, header_with_X, new_block_list]
 
 
 # 这个是生成combo2/combo3.../comboN的第2步（连续消除后的新图案矩阵），具体分为3步:
@@ -219,7 +225,7 @@ def update_tuan_matrix_with_X(tuan_matrix, block_list, win_result_list):
 # 注意: 和paylines_create_tuan.py不同的是，这个方法的第一个输入参数是转置后的矩阵
 # 另外，header需要单独处理，所以第1个参数是不包含header的
 def update_X_with_new_tuan(tuan_swap_matrix_with_X, tuan_list, quanzhong_list, header, header_quanzhong_list):
-    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, tuan_swap_matrix_with_X:" + str(tuan_swap_matrix_with_X))
+    pprint("update_X_with_new_tuan, tuan_swap_matrix_with_X:" + str(tuan_swap_matrix_with_X))
     # 生成新的随机图案，替换掉需要消除的图案，也就是被标记为'X'的图案
     # 这里需要注意的是，图案是依次向下跌落的。所以对一个REEL的数据进行处理时，要先倒着来
     mid_tuan_matrix_after_upate_X = [] # 保存中间数据，将'X'删掉后重新填充的图案矩阵
@@ -227,25 +233,27 @@ def update_X_with_new_tuan(tuan_swap_matrix_with_X, tuan_list, quanzhong_list, h
         reel_X_count = value.count('X')
         # 倒着收集每个REEL上不为'X'的数据, 最终会变成填充后的每一个REEL的图案数据
         reel_tuan = [v for v in reversed(value) if 'X' != v]
-        pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, old single reel:" + str(reel_tuan))
+        pprint("update_X_with_new_tuan, old single reel:" + str(reel_tuan))
         if reel_X_count > 0:        # 如果这一列有'X'，即需要填充新的图案
             reel_add_tuan = create_one_reel_tuan(tuan_list, quanzhong_list[index], reel_X_count)
             reel_tuan.extend(reel_add_tuan)
-        pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new single reel:" + str(reel_tuan))
+        pprint("update_X_with_new_tuan, new single reel:" + str(reel_tuan))
         mid_tuan_matrix_after_upate_X.append(reel_tuan)
-    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new tuan after update X:" + str(mid_tuan_matrix_after_upate_X))
+    pprint("update_X_with_new_tuan, new tuan after update X:" + str(mid_tuan_matrix_after_upate_X))
 
     # 将矩阵重新转置一下，同时在转置前先将每个REEL上的数据倒过来
     new_tuan = tools.swap_matrix(mid_tuan_matrix_after_upate_X, True)
-    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new tuan at last:" + str(new_tuan))
+    pprint("update_X_with_new_tuan, new tuan at last:" + str(new_tuan))
 
     # 接下来用同样的方式处理header
     reel_X_count = header.count('X')
+    pprint("update_X_with_new_tuan, header:" + str(header))
     # 倒着收集每个REEL上不为'X'的数据, 最终会变成填充后的每一个REEL的图案数据
-    new_header = [v for v in reversed(header) if 'X' != v]
+    new_header = [v for v in header if 'X' != v]
     if reel_X_count > 0:  # 如果这一列有'X'，即需要填充新的图案
         reel_add_tuan = create_one_reel_tuan(tuan_list, header_quanzhong_list, reel_X_count)
         new_header.extend(reel_add_tuan)
+    pprint("update_X_with_new_tuan, new_header:" + str(new_header))
     return [new_tuan, new_header]
 
 
@@ -323,11 +331,10 @@ UNIT_TEST_WIN_RESULT_LIST = [['J', 1, 0], ['9', 1, 2, 3, 1, 3, 3, 540], ['Q', 2,
 
 if __name__ == '__main__':
     # 跑1000次，确保测试结果ok
-    print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例1")
+    pprint("main, 测试用例1")
     for i in range(1000):
         UNIT_TEST_create_tuan_matrix_without_header(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 3, 5)
         UNIT_TEST_create_tuan_matrix_without_header(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 4, 5)
-    print("ok")
     # UNIT_TEST_create_one_block( UNIT_TEST_REEL_INDEX_LIST, UNIT_TEST_REEL_INDEX_QUANZHONG_LIST,
     #                             UNIT_TEST_BLOCK_LENGTH_LIST, UNIT_TEST_BLOCK_LENGTH_QUANZHONG_LIST,
     #                             UNIT_TEST_BLOCK_TYPE_LIST, UNIT_TEST_BLOCK_TYPE_QUANZHONG_LIST,

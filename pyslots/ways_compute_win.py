@@ -11,12 +11,14 @@
 '''
 import pandas
 import tools
-DEBUG_ON = True
-PACKAGE_NAME = 'ways_compute_win'
+from colored_logs.logger import Logger, LogType
 
+DEBUG_ON = False
+PACKAGE_NAME = 'ways_compute_win'
+log = Logger(ID = PACKAGE_NAME)
 def pprint(str):
     if DEBUG_ON:
-        print(str)
+        log.warning(str)
 
 # 以下数据只是为了说明数据格式，举例用的
 # pl_map = {
@@ -76,7 +78,7 @@ def compute_win_for_tuan_matrix(tuan_matrix, pl_map, with_header):
             if jiangjing > 0:
                 result_list.append(result)
     result_list.append(total_odd)
-    pprint("****package:" + PACKAGE_NAME + "compute_win_for_tuan_matrix  result_list  " + str(result_list))
+    pprint("compute_win_for_tuan_matrix  result_list  " + str(result_list))
     return result_list
 
 

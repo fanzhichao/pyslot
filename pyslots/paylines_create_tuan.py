@@ -14,7 +14,7 @@ import pytest
 import tools
 from tqdm import tqdm
 
-DEBUG_ON = True
+DEBUG_ON = False
 PACKAGE_NAME = 'paylines_create_tuan'
 
 def pprint(str):
@@ -52,7 +52,7 @@ def create_tuan_matrix(tuan_list, quanzhong_list, row, col):
 # 这个是生成combo2/combo3.../comboN的第1步（连续消除后的新图案矩阵）
 def update_tuan_matrix_with_X(tuan_matrix, win_result,paylines):
     # 把所有中奖图案替换为 'X'
-    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_tuan_matrix_with_X, old tuan:"+str(tuan_matrix))
+    pprint("**package:"+PACKAGE_NAME + "  **funtion:update_tuan_matrix_with_X, old tuan:"+str(tuan_matrix))
     for single_payline_win_result in win_result[0]:
         line_number = single_payline_win_result[-1]
         lianxu_tuan_nums = single_payline_win_result[1]
@@ -61,7 +61,7 @@ def update_tuan_matrix_with_X(tuan_matrix, win_result,paylines):
             i,j = single_payline[index]
             tuan_matrix[i][j] = 'X'
     # 记录每一个REEL有多少个'X'，然后生成相应的新图案，然后合成新的REEL
-    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_tuan_matrix_with_X, new tuan with 'X':"+str(tuan_matrix))
+    pprint("**package:"+PACKAGE_NAME + "  **funtion:update_tuan_matrix_with_X, new tuan with 'X':"+str(tuan_matrix))
     return tuan_matrix
 
 # 这个是生成combo2/combo3.../comboN的第2步（连续消除后的新图案矩阵），具体分为3步:
@@ -71,7 +71,7 @@ def update_tuan_matrix_with_X(tuan_matrix, win_result,paylines):
 def update_X_with_new_tuan(tuan_matrix_with_X, tuan_list, quanzhong_list):
     # 先将矩阵进行X Y转置，行和列换过来，从3 * 5 变成 5 * 3
     mid_tuan_matrix_with_X = tools.swap_matrix(tuan_matrix_with_X, False)
-    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new matrix tuan:" + str(mid_tuan_matrix_with_X))
+    pprint("**package:"+PACKAGE_NAME + "  **funtion:update_X_with_new_tuan, new matrix tuan:" + str(mid_tuan_matrix_with_X))
 
     # 生成新的随机图案，替换掉需要消除的图案，也就是被标记为'X'的图案
     # 这里需要注意的是，图案是依次向下跌落的。所以对一个REEL的数据进行处理时，要先倒着来
@@ -80,17 +80,17 @@ def update_X_with_new_tuan(tuan_matrix_with_X, tuan_list, quanzhong_list):
         reel_X_count = value.count('X')
         # 倒着收集每个REEL上不为'X'的数据, 最终会变成填充后的每一个REEL的图案数据
         reel_tuan = [v for v in reversed(value) if 'X' != v]
-        pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, old single reel:" + str(reel_tuan))
+        pprint("**package:"+PACKAGE_NAME + "  **funtion:update_X_with_new_tuan, old single reel:" + str(reel_tuan))
         if reel_X_count > 0:        # 如果这一列有'X'，即需要填充新的图案
             reel_add_tuan = create_one_reel_tuan(tuan_list, quanzhong_list[index], reel_X_count)
             reel_tuan.extend(reel_add_tuan)
-        pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new single reel:" + str(reel_tuan))
+        pprint("**package:"+PACKAGE_NAME + "  **funtion:update_X_with_new_tuan, new single reel:" + str(reel_tuan))
         mid_tuan_matrix_after_upate_X.append(reel_tuan)
-    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new tuan after update X:" + str(mid_tuan_matrix_after_upate_X))
+    pprint("**package:"+PACKAGE_NAME + "  **funtion:update_X_with_new_tuan, new tuan after update X:" + str(mid_tuan_matrix_after_upate_X))
 
     # 将矩阵重新转置一下，同时在转置前先将每个REEL上的数据倒过来
     new_tuan = tools.swap_matrix(mid_tuan_matrix_after_upate_X, True)
-    pprint("****package:"+PACKAGE_NAME + "  ****funtion:update_X_with_new_tuan, new tuan at last:" + str(new_tuan))
+    pprint("**package:"+PACKAGE_NAME + "  **funtion:update_X_with_new_tuan, new tuan at last:" + str(new_tuan))
     return new_tuan
 
 ########################  以下是单元测试用到的代码 ########################
@@ -109,7 +109,7 @@ UNIT_TEST_QUANZHONG_LIST_REELS = ((10, 5, 25, 10, 20, 12, 0, 5),
 def UNIT_TEST_create_tuan_matrix(src_tuan_list, src_quanzhong_list, row, col):
     tuan_list = create_tuan_matrix(src_tuan_list, src_quanzhong_list, row, col)
     tuan_count = 0
-    pprint("****package:" + PACKAGE_NAME + "  ****funtion:UNIT_TEST_create_all_tuan, new tuan matrix:" + str(tuan_list))
+    pprint("**package:" + PACKAGE_NAME + "  **funtion:UNIT_TEST_create_all_tuan, new tuan matrix:" + str(tuan_list))
     # 首先测试一下，看有没有非法图案，即所有图案都是图案数组中的
     for tuan in UNIT_TEST_TUAN_LIST:
         for row_tuan in tuan_list:
@@ -174,13 +174,13 @@ def UNIT_TEST_update_X_with_new_tuan(old_all_tuan_with_X, tuan_list, quanzhong_l
 
 if __name__ == '__main__':
     # 跑1000次，确保测试结果ok
-    print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例1")
+    print("**package:" + PACKAGE_NAME + "  **funtion:main, 测试用例1")
     for i in range(1000):
         UNIT_TEST_create_tuan_matrix(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 3, 5)
         UNIT_TEST_create_tuan_matrix(UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, 4, 5)
-    print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例2")
+    print("**package:" + PACKAGE_NAME + "  **funtion:main, 测试用例2")
     UNIT_TEST_update_tuan_matrix_with_X(UNIT_TEST_OLD_ALL_TUAN, UNIT_TEST_WIN_RESUT1, UNIT_TEST_PAYLINES, UNIT_TEST_RESULT_TUAN_AFTER_UP_X_1)
     UNIT_TEST_update_tuan_matrix_with_X(UNIT_TEST_OLD_ALL_TUAN, UNIT_TEST_WIN_RESUT2, UNIT_TEST_PAYLINES, UNIT_TEST_RESULT_TUAN_AFTER_UP_X_2)
-    print("****package:" + PACKAGE_NAME + "  ****funtion:main, 测试用例3")
+    print("**package:" + PACKAGE_NAME + "  **funtion:main, 测试用例3")
     UNIT_TEST_update_X_with_new_tuan(UNIT_TEST_OLD_TUAN1, UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, UNIT_TEST_NEW_TUAN1)
     UNIT_TEST_update_X_with_new_tuan(UNIT_TEST_OLD_TUAN2, UNIT_TEST_TUAN_LIST, UNIT_TEST_QUANZHONG_LIST_REELS, UNIT_TEST_NEW_TUAN2)

@@ -15,7 +15,7 @@ import pytest
 import tools
 from tqdm import tqdm
 
-DEBUG_ON = True
+DEBUG_ON = False
 PACKAGE_NAME = 'ways_create_tuan'
 
 def pprint(str):

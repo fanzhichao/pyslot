@@ -20,8 +20,6 @@ from colored_logs.logger import Logger, LogType
 DEBUG_ON = True
 PACKAGE_NAME = 'game6001'
 
-# just for test
-
 def pprint(str):
     if DEBUG_ON:
         print(str)

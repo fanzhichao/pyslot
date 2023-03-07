@@ -15,12 +15,13 @@ import tools
 from copy import copy, deepcopy
 DEBUG_ON = True
 PACKAGE_NAME = 'game5001'
+from colored_logs.logger import Logger, LogType
 
 def pprint(str):
     if DEBUG_ON:
         print(str)
 ##############  保存赔率概率表的excel ####################
-GAME5001_EXCEL = r"d:py\\game5001.xlsx"
+GAME5001_EXCEL = r"C:\\u\\doc\\game5001.xlsx"
 
 # 【可改】 随机生成的图案矩阵的最终赔率是否满足需要
 # 满足的条件是：它与赔率数组（excel中指定的所有赔率）中指定的某个元素对应的赔率相差不大
@@ -65,10 +66,11 @@ PAYLINES = [[(0,0), (2,1), (0,2), (2,3), (2,4)],
 
 
 if __name__ == '__main__':
+    log = Logger(ID=PACKAGE_NAME)
     pl_list, gl_list, pl_need_num_list = tools.get_pl_from_excel(GAME5001_EXCEL)
     num = sum(pl_need_num_list) # 需要生成的组合总数
     pl_get_num_list = [0] * len(pl_need_num_list)  # 保存一下每个赔率得到了多少个组合
-    pprint("**package:" + PACKAGE_NAME + "  **funtion main: 总共需要 "+str(num) + "个组合")
+    log.success("main: 总共需要 " + str(num) + "个组合")
     progress_bar = tqdm(total = num)
     # 跑多少组组合，一般来讲，跑满需要的赔率需要10W次以上
     for i in range(100):
@@ -89,7 +91,8 @@ if __name__ == '__main__':
         result.append([deepcopy(win_res), deepcopy(all_tuan)])
         combo_num = "combo "+str(len(result))
         result = [combo_num] + [total_win] + result
-        pprint("**package:"+PACKAGE_NAME + "  **funtion main: 第 "+ str(i+1) +"局结果是:"+ str(result))
+        log.success("main: 得到一局结果 " + str(combo_num))
+        pprint("main: 这一局的详细数据是 " + str(result))
 
         # 如果这一局中奖了，要看这局的中奖结果要加到哪个赔率那里
         if total_win > 0 :
@@ -99,15 +102,14 @@ if __name__ == '__main__':
                     if pl_get_num_list[i] < pl_need_num_list[i]:
                         pl_get_num_list[i] = pl_get_num_list[i] + 1
                         # tools.save_to_php() 需要后续完善
-                        pprint("**package:" + PACKAGE_NAME + "  **funtion main: 第 "+str(i)+" 个赔率已生成组合数 "+str(pl_get_num_list[i]) + "/"+str(pl_need_num_list[i]))
+                        log.success("main: 第" + str(
+                            i) + "个赔率已生成组合数 " + str(pl_get_num_list[i]) + "/" + str(pl_need_num_list[i]))
                         progress_bar.update(1)  # 进度条加1
         else: # 没中奖，就加到赔率为0的列表里
             pl_get_num_list[0] = pl_get_num_list[0] + 1
             progress_bar.update(1)  # 进度条加1
             # tools.save_to_php() 需要后续完善
-
-            pprint("**package:" + PACKAGE_NAME + "  **funtion main: 第 1 个赔率已生成组合数 " + str(
-                pl_get_num_list[0]) + "/" + str(pl_need_num_list[0]))
+            log.success("main: 第1个赔率已生成组合数 " + str(pl_get_num_list[0]) + "/" + str(pl_need_num_list[0]))
 
         # 如果已经生成了所有需要的组合，则退出程序
         if sum(pl_get_num_list) >= num:

@@ -24,7 +24,7 @@ def pprint(str):
     if DEBUG_ON:
         print(str)
 ##############  保存赔率概率表的excel ####################
-GAME6001_EXCEL = r"d:py\\game5001.xlsx"
+GAME6001_EXCEL = r"C:\\u\\doc\\game5001.xlsx"
 
 #################  供生成图案用  ########################
 # 【必改】 定义去掉header后图案的行数和列数

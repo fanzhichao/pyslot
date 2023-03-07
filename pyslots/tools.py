@@ -9,15 +9,23 @@
 @Time    :   2023/2/7 19:01
 @Desc    :   工具类
 '''
-
+import sys
+import json
 import pandas
+import codecs
+import requests
+import time
 from copy import copy, deepcopy
+from colored_logs.logger import Logger, LogType
+
 DEBUG_ON = False
 PACKAGE_NAME = 'tools'
+OUT_PUT_TO_GO_FILE = r"C:\\u\\doc\\game20001.go"
 
-def pprint(str):
+log = Logger(ID=PACKAGE_NAME)
+def print_success(str):
     if DEBUG_ON:
-        print(str)
+        log.success(str)
 
 
 # 从excel表中读取赔率(pv)和概率(gl)数据，以及每个赔率需要生成的组合总数
@@ -33,7 +41,7 @@ def get_pl_from_excel(excel_file_name):
     sum_gl = sum(gl_list)
     # 各个赔率的概率总和应该在0.95-1之间
     if sum_gl > 1 or sum_gl < 0.95:
-        pprint("****package:" + PACKAGE_NAME + "  ****funtion:get_pl_from_excel, total peilv is:" + str(sum_gl))
+        print_success("get_pl_from_excel, 总赔率不正常 is:" + str(sum_gl))
     return pl_list, gl_list, pl_need_num_list
 
 
@@ -97,11 +105,85 @@ def pl_is_match(pl, pl_to_match_list, index,pl_min,pl_max):
             return  True
     return False
 
-# 将指定组合保存到php文件中
-# result为这一局的数据，pl是这一局对应的赔率，pl_index是pl在赔率数组中的index
-def save_to_php(php_filename, result, pl_index, pl):
-    # 需要后续更新完善
-    i = 1
+# 将指定组合保存到go文件中
+def save_to_go(go_filename, data):
+    with codecs.open(go_filename, 'w+', encoding='utf-8') as f:
+        f.writelines(str("package main") + '\n')
+        f.writelines(str("import \"fmt\"") + '\n')
+        f.writelines(str("func main() {") + '\n')
+        f.writelines(str("// 里面包含单条中奖支付线需要的数据") + '\n')
+        f.writelines(str("type Pay_Line struct{") + '\n')
+        f.writelines(str("        tuan_single string  // 中奖的图案，如\"A\"") + '\n')
+        f.writelines(str("        tuan_num   int      // 图案的连续数，如 2 代表有两个连续的\"A\"") + '\n')
+        f.writelines(str("        tuan_win   float32  // 图案的中奖金额") + '\n')
+        f.writelines(str("        pay_line_index int  // 这条支付线的index，从0开始") + '\n')
+        f.writelines(str("}") + '\n')
+        f.writelines('\n')
+        f.writelines(str("type Win_Result struct{") + '\n')
+        f.writelines(str("        total_win float32               // 总的中奖金额") + '\n')
+        f.writelines(str("        pay_lines_win []Pay_Line        // 保存每条中奖支付线的信息") + '\n')
+        f.writelines(str("        tuan_matrix [][]string          // 保存所有的图案数据") + '\n')
+        f.writelines(str("}") + '\n')
+        f.writelines('\n')
+        save_data_to_go(f, data)
+
+
+def save_data_to_go(f, data):
+    f.writelines('// 下面每1个key对应一个赔率，一个赔率有很多个图案组合与之对应，所以每个key对应一个图案数组'+ '\n')
+    f.writelines(str("data:=map[string][]Win_Result{") + '\n')
+    print_success(data)
+    for i, value in enumerate(data):
+        f.writelines(str("        \""+str(i)+"\":[]Win_Result{") + '\n')
+        print_success(value)
+        for v in value:
+            total_win       = v[0][0]
+            pay_lines_win   = v[0][1]
+            tuan_matrix     = v[1]
+            f.writelines(formate_one_result(total_win, pay_lines_win, tuan_matrix) + '\n')
+        f.writelines(str("        },") + '\n')
+    f.writelines(str("    }") + '\n')
+
+    str1 = str("    fmt.Println(data[\"2\"])") + '\n'
+    f.writelines(str1)
+    str1 = str("    fmt.Println(data[\"2\"][0].total_win)") + '\n'
+    f.writelines(str1)
+
+    f.writelines(str("}") + '\n')
+    #f.close()
+def formate_one_result(total_win, pay_lines_win, tuan_matrix):
+    str_beg = "                Win_Result{"
+    res = str_beg+str(total_win)+","+format_go_pay_lines(pay_lines_win)+","+format_go_tuan_matrix(tuan_matrix)+"},"
+    print_success(res)
+    return res
+
+# return []Pay_Line{Pay_Line{"J", 3, 8.1, 0}, Pay_Line{"Q", 3, 6.2,2}}
+def format_go_pay_lines(pay_lines_list):
+    print_success(pay_lines_list)
+    str_beg = "[]Pay_Line{"
+    str_end = "}"
+    str_pay_line = "Pay_Line{kuohao1}\"{tuan}\",{tuan_num},{win},{payline_index}{kuohao2}"
+    mid_str = ""
+    if len(pay_lines_list) < 1:
+        return "[]Pay_Line{}"
+    else:
+        for v in pay_lines_list:
+            mid_str = mid_str + str_pay_line.format(kuohao1="{",kuohao2 = "},",\
+            tuan = v[0], tuan_num = v[1], win = v[2], payline_index = v[3])
+
+        print_success(str_beg + mid_str + str_end)
+        return(str_beg + mid_str + str_end)
+
+
+# return  [][]string{{"J", "J", "J","J", "J"}, {"J", "J", "J","J", "J"}, {"J", "J", "J","J", "J"}}
+def format_go_tuan_matrix(tuan_matrix):
+    str = "[][]string{kuohao1}\"{a00}\",\"{a01}\",\"{a02}\",\"{a03}\",\"{a04}\"{kuohao2}\"{a10}\",\"{a11}\",\"{a12}\",\"{a13}\",\"{a14}\"{kuohao2}\"{a20}\",\"{a21}\",\"{a22}\",\"{a23}\",\"{a24}\"{kuohao3}"
+    res = str.format(kuohao1 = "{{", a00=tuan_matrix[0][0], a01=tuan_matrix[0][1], a02=tuan_matrix[0][2], \
+        a03=tuan_matrix[0][3], a04=tuan_matrix[0][4], kuohao2="},{",a10=tuan_matrix[1][0], a11=tuan_matrix[1][1],\
+        a12=tuan_matrix[1][2], a13=tuan_matrix[1][3], a14=tuan_matrix[1][4],a20=tuan_matrix[2][0], a21=tuan_matrix[2][1],\
+        a22=tuan_matrix[2][2], a23=tuan_matrix[2][3], a24=tuan_matrix[2][4],kuohao3 ="}}")
+    print_success(res)
+    print_success(res)
+    return res
 ########################  以下是单元测试用到的代码 ########################
 ########################           测试用例1    ########################
 UNIT_TEST_MATRIX = [ ['9','S','K','9','J'],
@@ -142,4 +224,9 @@ if __name__ == '__main__':
     UNIT_TEST_swap_matrix(UNIT_TEST_MATRIX, False, UNIT_TEST_MATRIX_SWAP)
     UNIT_TEST_swap_matrix(UNIT_TEST_MATRIX, True, UNIT_TEST_MATRIX_SWAP_REVERSE_REEL)
     UNIT_TEST_swap_matrix_with_header(UNIT_TEST_MATRIX_WITH_HEADER, UNIT_TEST_MATRIX_WITH_HEADER_SWAP)
+    #save_to_go(OUT_PUT_TO_GO_FILE, '')
+    matrix =  [['B', 'F', 'G', 'F', 'G'], ['F', 'H', 'E', 'C', 'E'], ['F', 'G', 'A', 'B', 'G']]
+    format_go_tuan_matrix(matrix)
+    p_l = [['E', 3, 4, 3], ['E', 3, 4, 21]]
+    format_go_pay_lines(p_l)
 

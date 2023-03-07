@@ -91,7 +91,7 @@ def compute_win_for_tuan_matrix(all_tuan, paylines, pl_map):
             singleline_result.append(index)
             result.append(singleline_result)  # 记录是第几条payline
             total_odd = total_odd + singleline_result[2]
-    return [result,total_odd]
+    return [total_odd, result]
 
 ########################  以下是单元测试用到的代码 ########################
 ########################           测试用例1    ########################

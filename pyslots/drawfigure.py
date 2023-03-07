@@ -8,7 +8,9 @@
 @Desc    :   专门用来绘制RTP走势图，具体要根据大量的bet数据去生成
 '''
 import matplotlib.pyplot as plt
-
+import requests
+import random
+import time
 BET_LIST = [100, 150, 500, 100, 500, 50, 300,500, 100,300]
 WIN_LIST = [0, 50, 200, 0, 0, 150, 600, 0, 0, 150]
 RTX_MIN = 0.3
@@ -18,6 +20,23 @@ AXIS_Y_MIN = 0
 AXIS_Y_MAX = 1.1
 IMAGE_WITH = 1000
 IMAGE_HEIGTH = 1000
+
+# 通过HTTP请求，获取每一局spin的结果数据，然后统计结果数据。
+def get_result_from_url():
+    bet_array = [1,2,5,10,15,20,50,100]
+    userid_array = [1, 2, 5, 10, 15, 20, 50, 100]
+    bet_list = []
+    win_list = []
+    url = "http://127.0.0.1:4523/m1/2311909-0-default/cash"
+    for i in range(10):
+        bet = random.choice(bet_array)
+        userid = random.choice(userid_array)
+        params = {"userid": userid, "bet":bet}
+        # 这里要解析一下收到的结果，得到每一局的win
+        res = requests.post(url, data=params)
+        bet_list.append(bet)
+        win_list.append(userid)
+    return bet_list, win_list
 def get_total_RTP(bet_list, win_list):
     total_bet_list = []
     total_rtp_list = []
@@ -52,3 +71,5 @@ def draw_total_RTP(total_bet_list, total_rtp_list, rtp_min, rtp_max):
 if __name__ == '__main__':
     [list1, list2] = get_total_RTP(BET_LIST, WIN_LIST)
     draw_total_RTP(list1,list2, RTX_MIN, RTX_MAX)
+    res = get_result_from_url()
+    print(res)

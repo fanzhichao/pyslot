@@ -1,0 +1,13 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+Alice1 -> Bob: Authentication Request
+Bob --> Alice1: Authentication Response
+
+Alice1 -> Bob: Another authentication Request
+Alice1 <-- Bob: another authentication Response
+Alice2 -> Bob2: Another authentication Request
+Bob2 -> Bob2: Another authentication Request
+@enduml

@@ -136,37 +136,39 @@ if __name__ == '__main__':
     go_data = [[]]*len(pl_list)
     for i in range(len(go_data)):
         go_data[i] = []
-    with open(GAME20001_OUT_PUT_TXT,'w') as f:
-        for i in range(200000):
-            quzhang_list = QUANZHONG_LIST_REELS
-            if i > 100000: # 换组合，可以更大概率产生高赔率
-                quzhang_list = QUANZHONG_LIST_REELS_RICH
-            all_tuan = create_tuan.create_tuan_matrix(TUAN_LIST, quzhang_list, REEL_LENGTH, REEL_NUM)
-            win_res = compute_win.compute_win_for_tuan_matrix(all_tuan, PAYLINES, TUAN_PL_MAP)
-            result = [deepcopy(win_res), deepcopy(all_tuan)]
-            # 写到文本文件里，只是用来快速查看数据
-            f.writelines(str(result) +'\n')
-            total_win = win_res[0]
-            # 如果这一局中奖了，要看这局的中奖结果要加到哪个赔率那里
-            if total_win > 0 :
-                for i, value in enumerate(pl_list):
-                    if tools.pl_is_match(total_win, pl_list,i, PV_MIN, PV_MAX):
-                        # 只有某个赔率没有满的时候，才需要添加
-                        if pl_get_num_list[i] < pl_need_num_list[i]:
-                            pl_get_num_list[i] = pl_get_num_list[i] + 1
-                            go_data[i].append(result)
-                            progress_bar_total.update(1)  # 总的进度条加1
-                            progress_bar_list[i + 1].update(1) # 对应赔率的进度条加1
-            else: # 没中奖，就加到赔率为0的列表里
-                if pl_get_num_list[0] < pl_need_num_list[0]:
-                    pl_get_num_list[0] = pl_get_num_list[0] + 1
-                    go_data[0].append(result)
-                    progress_bar_total.update(1)  # 总的进度条加1
-                    progress_bar_list[1].update(1)  # 赔率为0的进度条加1
-                    print_success("第1个赔率已生成组合数 {0}/{1}".format(pl_get_num_list[0],pl_need_num_list[0]))
-            # 如果已经生成了所有需要的组合，则退出程序
-            if sum(pl_get_num_list) >= num:
-                break
+
+    for i in range(200000):
+        quzhang_list = QUANZHONG_LIST_REELS
+        if i > 100000: # 换组合，可以更大概率产生高赔率
+            quzhang_list = QUANZHONG_LIST_REELS_RICH
+        all_tuan = create_tuan.create_tuan_matrix(TUAN_LIST, quzhang_list, REEL_LENGTH, REEL_NUM)
+        win_res = compute_win.compute_win_for_tuan_matrix(all_tuan, PAYLINES, TUAN_PL_MAP)
+        result = [deepcopy(win_res), deepcopy(all_tuan)]
+        # 写到文本文件里，只是用来快速查看数据
+        #f.writelines(str(result) +'\n')
+        total_win = win_res[0]
+        # 如果这一局中奖了，要看这局的中奖结果要加到哪个赔率那里
+        if total_win > 0 :
+            for i, value in enumerate(pl_list):
+                if tools.pl_is_match(total_win, pl_list,i, PV_MIN, PV_MAX):
+                    # 只有某个赔率没有满的时候，才需要添加
+                    if pl_get_num_list[i] < pl_need_num_list[i]:
+                        pl_get_num_list[i] = pl_get_num_list[i] + 1
+                        go_data[i].append(result)
+                        progress_bar_total.update(1)  # 总的进度条加1
+                        progress_bar_list[i + 1].update(1) # 对应赔率的进度条加1
+        else: # 没中奖，就加到赔率为0的列表里
+            if pl_get_num_list[0] < pl_need_num_list[0]:
+                pl_get_num_list[0] = pl_get_num_list[0] + 1
+                go_data[0].append(result)
+                progress_bar_total.update(1)  # 总的进度条加1
+                progress_bar_list[1].update(1)  # 赔率为0的进度条加1
+                print_success("第1个赔率已生成组合数 {0}/{1}".format(pl_get_num_list[0],pl_need_num_list[0]))
+        # 如果已经生成了所有需要的组合，则退出程序
+        if sum(pl_get_num_list) >= num:
+            break
     # 将所有得到的结果保存到go文件中
-    tools.save_to_go(r"C:\\u\\doc\\game20001.go",go_data)
+    #tools.save_to_go(r"C:\\u\\doc\\game20001.go",go_data)
+    with open(GAME20001_OUT_PUT_TXT, 'w') as f:
+        tools.save_data_to_txt(f,go_data)
 

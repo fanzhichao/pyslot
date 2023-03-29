@@ -108,71 +108,115 @@ def pl_is_match(pl, pl_to_match_list, index,pl_min,pl_max):
 # 将指定组合保存到go文件中
 def save_to_go(go_filename, data):
     with codecs.open(go_filename, 'w+', encoding='utf-8') as f:
-        f.writelines(str("package main") + '\n')
+        f.writelines(str("package fruit_party") + '\n')
+        f.writelines('\n')
         f.writelines(str("import \"fmt\"") + '\n')
+        f.writelines('\n')
         f.writelines(str("func main() {") + '\n')
-        f.writelines(str("// 里面包含单条中奖支付线需要的数据") + '\n')
-        f.writelines(str("type Pay_Line struct{") + '\n')
-        f.writelines(str("        tuan_single string  // 中奖的图案，如\"A\"") + '\n')
-        f.writelines(str("        tuan_num   int      // 图案的连续数，如 2 代表有两个连续的\"A\"") + '\n')
-        f.writelines(str("        tuan_win   float32  // 图案的中奖金额") + '\n')
-        f.writelines(str("        pay_line_index int  // 这条支付线的index，从0开始") + '\n')
-        f.writelines(str("}") + '\n')
+        f.writelines(str("    // 里面包含单条中奖支付线需要的数据") + '\n')
+        f.writelines(str("    type PayLine struct{") + '\n')
+        f.writelines(str("        TuanSingle   string  `json:\"tuan_single\"`     // 中奖的图案，如\"A\"") + '\n')
+        f.writelines(str("        TuanNum      int     `json:\"tuan_num\"`        // 图案的连续数，如 2 代表有两个连续的\"A\"") + '\n')
+        f.writelines(str("        TuanWin      float32 `json:\"tuan_win\"`        // 图案的中奖金额") + '\n')
+        f.writelines(str("        PayLineIndex int     `json:\"pay_line_index\"`  // 这条支付线的index，从0开始") + '\n')
+        f.writelines(str("    }") + '\n')
         f.writelines('\n')
-        f.writelines(str("type Win_Result struct{") + '\n')
-        f.writelines(str("        total_win float32               // 总的中奖金额") + '\n')
-        f.writelines(str("        pay_lines_win []Pay_Line        // 保存每条中奖支付线的信息") + '\n')
-        f.writelines(str("        tuan_matrix [][]string          // 保存所有的图案数据") + '\n')
-        f.writelines(str("}") + '\n')
+        f.writelines(str("    type WinResult struct{") + '\n')
+        f.writelines(str("        TotalWin    float32    `json:\"total_win\"`     // 总的中奖金额") + '\n')
+        f.writelines(str("        PayLinesWin []PayLine  `json:\"pay_lines_win\"` // 保存每条中奖支付线的信息") + '\n')
+        f.writelines(str("        TuanMatrix  [][]string `json:\"tuan_matrix\"`   // 保存所有的图案数据") + '\n')
+        f.writelines(str("    }") + '\n')
         f.writelines('\n')
+        f.writelines(str("    data := make(map[string][]WinResult)") + '\n')
         save_data_to_go(f, data)
 
 
 def save_data_to_go(f, data):
-    f.writelines('// 下面每1个key对应一个赔率，一个赔率有很多个图案组合与之对应，所以每个key对应一个图案数组'+ '\n')
-    f.writelines(str("data:=map[string][]Win_Result{") + '\n')
     print_success(data)
     for i, value in enumerate(data):
-        f.writelines(str("        \""+str(i)+"\":[]Win_Result{") + '\n')
-        print_success(value)
-        for v in value:
+        for j,v in enumerate(value):
             total_win       = v[0][0]
             pay_lines_win   = v[0][1]
             tuan_matrix     = v[1]
-            f.writelines(formate_one_result(total_win, pay_lines_win, tuan_matrix) + '\n')
-        f.writelines(str("        },") + '\n')
-    f.writelines(str("    }") + '\n')
+            f.writelines(formate_one_result(i,j,total_win, pay_lines_win, tuan_matrix) + '\n')
+        str_end_format = "    data[\"{0}\"] = winResults{1}"
+        str_end = str_end_format.format(i, i)
+        f.writelines(str_end + '\n')
+        f.writelines('\n')
 
-    str1 = str("    fmt.Println(data[\"2\"])") + '\n'
+    str1 = str("    fmt.Println(data[\"0\"])") + '\n'
     f.writelines(str1)
-    str1 = str("    fmt.Println(data[\"2\"][0].total_win)") + '\n'
+    str1 = str("    fmt.Println(data[\"0\"][0].TotalWin)") + '\n'
     f.writelines(str1)
 
     f.writelines(str("}") + '\n')
     #f.close()
-def formate_one_result(total_win, pay_lines_win, tuan_matrix):
-    str_beg = "                Win_Result{"
-    res = str_beg+str(total_win)+","+format_go_pay_lines(pay_lines_win)+","+format_go_tuan_matrix(tuan_matrix)+"},"
+
+def save_data_to_txt(f,data):
+    for i, value in enumerate(data):
+        for j, v in enumerate(value):
+            total_win       = v[0][0]
+            pay_lines_win   = v[0][1]
+            tuan_matrix     = v[1]
+            print(formate_one_result_txt(i,total_win, pay_lines_win, tuan_matrix) + '\n')
+            f.writelines(formate_one_result_txt(i,total_win, pay_lines_win, tuan_matrix) + '\n')
+            #f.writelines(formate_one_result_txt(i,total_win, pay_lines_win, tuan_matrix) + '\n')
+
+def formate_one_result(i,j, total_win, pay_lines_win, tuan_matrix):
+    str_beg_format = "    winResults{0}[{1}] = WinResult"
+    str_beg = str_beg_format.format(i,j)
+    res = str_beg+"{"+str(total_win)+","+format_go_pay_lines(pay_lines_win)+","+format_go_tuan_matrix(tuan_matrix)+"}"
     print_success(res)
     return res
+
+# {"group":0,"total_win":0,"pay_lines_win":[{"tuan_single":"A","tuan_num":2,"tuan_win":0.2,"pay_line_index":5},{"tuan_single":"A","tuan_num":2,"tuan_win":0.2,"pay_line_index":14},{"tuan_single":"A","tuan_num":2,"tuan_win":0.2,"pay_line_index":20}],"tuan_matrix":[["G","D","C","G","H"],["A","E","H","B","D"],["E","A","B","E","E"]]}
+def formate_one_result_txt(i, total_win, pay_lines_win, tuan_matrix):
+    str_format = "\"group\":{0},\"total_win\":{1},\"pay_lines_win\":{2},\"tuan_matrix\":{3}"
+    str = str_format.format(i,total_win,format_go_pay_lines_txt(pay_lines_win),format_go_tuan_matrix_txt(tuan_matrix))
+    print_success(str)
+    return "{"+str+"}"
 
 # return []Pay_Line{Pay_Line{"J", 3, 8.1, 0}, Pay_Line{"Q", 3, 6.2,2}}
 def format_go_pay_lines(pay_lines_list):
     print_success(pay_lines_list)
-    str_beg = "[]Pay_Line{"
+    str_beg = "[]PayLine{"
     str_end = "}"
-    str_pay_line = "Pay_Line{kuohao1}\"{tuan}\",{tuan_num},{win},{payline_index}{kuohao2}"
+    str_pay_line = "PayLine{kuohao1}\"{tuan}\",{tuan_num},{win},{payline_index}{kuohao2}"
     mid_str = ""
     if len(pay_lines_list) < 1:
-        return "[]Pay_Line{}"
+        return "[]PayLine{}"
     else:
-        for v in pay_lines_list:
-            mid_str = mid_str + str_pay_line.format(kuohao1="{",kuohao2 = "},",\
-            tuan = v[0], tuan_num = v[1], win = v[2], payline_index = v[3])
+        for i,v in enumerate(pay_lines_list):
+            if i != len(pay_lines_list) - 1:
+                mid_str = mid_str + str_pay_line.format(kuohao1="{",kuohao2 = "},",\
+                tuan = v[0], tuan_num = v[1], win = v[2], payline_index = v[3])
+            else:
+                mid_str = mid_str + str_pay_line.format(kuohao1="{",kuohao2 = "}",\
+                tuan = v[0], tuan_num = v[1], win = v[2], payline_index = v[3])
+
 
         print_success(str_beg + mid_str + str_end)
         return(str_beg + mid_str + str_end)
 
+def format_go_pay_lines_txt(pay_lines_list):
+    str_beg = "["
+    str_end = "]"
+    str_pay_line = "\"tuan_single\":\"{tuan}\",\"tuan_num\":{tuan_num},\"tuan_win\":{win},\"pay_line_index\":{payline_index}"
+    mid_str = ""
+    if len(pay_lines_list) < 1:
+        return "[]"
+    else:
+        for i,v in enumerate(pay_lines_list):
+            if i != len(pay_lines_list) - 1:
+                mid_str = mid_str + "{"+ str_pay_line.format(kuohao1="{",kuohao2 = "},",\
+                tuan = v[0], tuan_num = v[1], win = v[2], payline_index = v[3]) + "},"
+            else:
+                mid_str = mid_str  + "{" + str_pay_line.format(kuohao1="{",kuohao2 = "}",\
+                tuan = v[0], tuan_num = v[1], win = v[2], payline_index = v[3]) + "}"
+
+        mid_str = mid_str
+        print_success(str_beg + mid_str + str_end)
+        return(str_beg + mid_str + str_end)
 
 # return  [][]string{{"J", "J", "J","J", "J"}, {"J", "J", "J","J", "J"}, {"J", "J", "J","J", "J"}}
 def format_go_tuan_matrix(tuan_matrix):
@@ -181,6 +225,16 @@ def format_go_tuan_matrix(tuan_matrix):
         a03=tuan_matrix[0][3], a04=tuan_matrix[0][4], kuohao2="},{",a10=tuan_matrix[1][0], a11=tuan_matrix[1][1],\
         a12=tuan_matrix[1][2], a13=tuan_matrix[1][3], a14=tuan_matrix[1][4],a20=tuan_matrix[2][0], a21=tuan_matrix[2][1],\
         a22=tuan_matrix[2][2], a23=tuan_matrix[2][3], a24=tuan_matrix[2][4],kuohao3 ="}}")
+    print_success(res)
+    print_success(res)
+    return res
+
+def format_go_tuan_matrix_txt(tuan_matrix):
+    str = "{kuohao1}\"{a00}\",\"{a01}\",\"{a02}\",\"{a03}\",\"{a04}\"{kuohao2}\"{a10}\",\"{a11}\",\"{a12}\",\"{a13}\",\"{a14}\"{kuohao2}\"{a20}\",\"{a21}\",\"{a22}\",\"{a23}\",\"{a24}\"{kuohao3}"
+    res = str.format(kuohao1 = "[[", a00=tuan_matrix[0][0], a01=tuan_matrix[0][1], a02=tuan_matrix[0][2], \
+        a03=tuan_matrix[0][3], a04=tuan_matrix[0][4], kuohao2="],[",a10=tuan_matrix[1][0], a11=tuan_matrix[1][1],\
+        a12=tuan_matrix[1][2], a13=tuan_matrix[1][3], a14=tuan_matrix[1][4],a20=tuan_matrix[2][0], a21=tuan_matrix[2][1],\
+        a22=tuan_matrix[2][2], a23=tuan_matrix[2][3], a24=tuan_matrix[2][4],kuohao3 ="]]")
     print_success(res)
     print_success(res)
     return res

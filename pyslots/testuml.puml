@@ -3,7 +3,8 @@
 
 autonumber
 
-Alice1 -> Bob: Authentication Request
+Alice1 -> Bob: 调用1次
+Bob --> Alice1: Authentication Response
 Bob --> Alice1: Authentication Response
 
 Alice1 -> Bob: Another authentication Request

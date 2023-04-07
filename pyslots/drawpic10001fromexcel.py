@@ -27,7 +27,7 @@ AXIS_Y_MAX = 1.5
 IMAGE_WITH = 1000
 IMAGE_HEIGTH = 1000
 
-GAME10001_EXCEL = r"C:\\u\\doc\\slots_record_0327.xlsx"
+GAME10001_EXCEL = r"C:\\u\\doc\\tmp_echo_asset_20230329_13_45.xlsx"
 # 通过HTTP请求，获取每一局spin的结果数据，然后统计结果数据。
 def get_result_from_excel():
     user_list = []
